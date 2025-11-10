@@ -21,7 +21,9 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
       const config: Partial<AppConfig> = {};
       
       configItems.forEach(item => {
-        config[item.key as keyof AppConfig] = item.value;
+        if (item.value !== null && item.value !== undefined) {
+          config[item.key as keyof AppConfig] = item.value as never;
+        }
       });
       
       const isConfigured = !!(

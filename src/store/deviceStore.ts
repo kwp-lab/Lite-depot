@@ -44,12 +44,15 @@ export const useDeviceStore = create<DeviceState>((set, get) => ({
       await db.devices.clear();
       
       // Transform and save records
-      const devices: Device[] = records.map(record => ({
-        id: record.id,
-        device_id: record.fields.device_id || record.fields.Device_ID || record.id,
-        fields: record.fields,
-        updated_at: Date.now(),
-      }));
+      const devices: Device[] = records.map(record => {
+        const deviceId = record.fields.device_id || record.fields.Device_ID || record.id;
+        return {
+          id: record.id,
+          device_id: String(deviceId),
+          fields: record.fields,
+          updated_at: Date.now(),
+        };
+      });
       
       await db.devices.bulkPut(devices);
       
