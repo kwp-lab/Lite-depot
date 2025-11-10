@@ -1,73 +1,69 @@
-# React + TypeScript + Vite
+# LiteDepot (轻量级进出库管理软件)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Lightweight Inventory Management System**
 
-Currently, two official plugins are available:
+A desktop application for managing device inventory with barcode scanning support. Built with Electron, React, and TypeScript.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## React Compiler
+- 📦 **Device Inbound**: Quick device check-in with barcode scanning
+- 📤 **Batch Outbound**: Scan multiple devices for batch checkout with borrower tracking
+- 📋 **Inventory Check**: Complete inventory auditing with unscanned device reporting
+- ⚙️ **Settings**: Easy configuration and device synchronization
+- 🔄 **AITable Integration**: Seamless integration with AITable API
+- 💾 **Offline Support**: Local IndexedDB caching for fast lookups
+- 🖥️ **Cross-platform**: Windows (primary), macOS, and Linux support
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Technology Stack
 
-## Expanding the ESLint configuration
+- **Desktop Framework**: Electron
+- **UI Framework**: React with TypeScript
+- **Styling**: Tailwind CSS
+- **State Management**: Zustand
+- **Local Database**: IndexedDB (via Dexie.js)
+- **Build Tool**: Vite
+- **API Integration**: AITable (Airtable-compatible)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Getting Started
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Installation
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+\`\`\`bash
+# Clone the repository
+git clone https://github.com/kwp-lab/Lite-depot.git
+cd Lite-depot
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+# Install dependencies
+npm install
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+# Run in development mode
+npm run dev
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+# Build for production
+npm run build
+\`\`\`
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### Configuration
+
+1. Launch the application
+2. On first run, you'll see the Setup page
+3. Enter your AITable credentials
+4. Configure field mappings if needed
+5. Click "Start Using" to begin
+
+## Project Structure
+
+\`\`\`
+src/
+├── api/              # AITable API service layer
+├── components/       # Reusable UI components
+├── db/              # IndexedDB configuration
+├── lib/             # Utility functions
+├── pages/           # Application pages/routes
+├── store/           # Zustand state management
+└── types/           # TypeScript type definitions
+\`\`\`
+
+---
+
+**LiteDepot** - 让设备管理更简单 (Making device management easier)
