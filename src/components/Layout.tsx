@@ -1,11 +1,11 @@
 import React from 'react';
 import { Sidebar } from './Sidebar';
 import { MainContent } from './MainContent';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Outlet } from 'react-router-dom';
 import { useConfigStore } from '@/store';
 
 interface LayoutProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
@@ -20,7 +20,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar onLogout={handleLogout} />
-      <MainContent>{children}</MainContent>
+      <MainContent>{children || <Outlet />}</MainContent>
     </div>
   );
 };

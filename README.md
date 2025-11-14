@@ -28,7 +28,7 @@ A desktop application for managing device inventory with barcode scanning suppor
 
 ### Installation
 
-\`\`\`bash
+```bash
 # Clone the repository
 git clone https://github.com/kwp-lab/Lite-depot.git
 cd Lite-depot
@@ -41,7 +41,7 @@ npm run dev
 
 # Build for production
 npm run build
-\`\`\`
+```
 
 ### Configuration
 
@@ -53,7 +53,7 @@ npm run build
 
 ## Project Structure
 
-\`\`\`
+```
 src/
 ├── api/              # AITable API service layer
 ├── components/       # Reusable UI components
@@ -62,8 +62,7 @@ src/
 ├── pages/           # Application pages/routes
 ├── store/           # Zustand state management
 └── types/           # TypeScript type definitions
-\`\`\`
+```
 
----
 
 **LiteDepot** - 让设备管理更简单 (Making device management easier)

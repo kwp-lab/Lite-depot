@@ -1,15 +1,13 @@
 import { HttpClient } from './http';
 import { AITableSchema, AITableRecord } from '../types';
 
-interface AITableResponse {
-  tables: Array<{
-    id: string;
-    fields: Array<{
-      id: string;
-      name: string;
-      type: string;
-    }>;
-  }>;
+interface FieldSchemaResponse {
+  code: number;
+  success: boolean;
+  data: {
+    fields: Array<any>;
+  };
+  message: string;
 }
 
 interface RecordsResponse {
@@ -22,7 +20,7 @@ export class AITableService {
   private tableId: string = '';
 
   initialize(apiKey: string, baseId: string, tableId: string) {
-    const baseURL = 'https://api.airtable.com/v2';
+    const baseURL = 'https://aitable.ai/fusion/v1';
     this.http = new HttpClient(baseURL, apiKey);
     this.baseId = baseId;
     this.tableId = tableId;
@@ -34,14 +32,15 @@ export class AITableService {
 
   async getSchema(): Promise<AITableSchema> {
     if (!this.http) throw new Error('AITable service not initialized');
+
+    const url = `/datasheets/${this.tableId}/fields`;
+    const response = await this.http.get<FieldSchemaResponse>(url);
     
-    const url = `/meta/bases/${this.baseId}/tables`;
-    const response = await this.http.get<AITableResponse>(url);
+    if (!response.success || !response.data) {
+      throw new Error(response.message || 'Failed to get schema');
+    }
     
-    const table = response.tables.find((t) => t.id === this.tableId);
-    if (!table) throw new Error('Table not found');
-    
-    return { fields: table.fields };
+    return { fields: response.data.fields };
   }
 
   async getRecords(viewId?: string): Promise<AITableRecord[]> {

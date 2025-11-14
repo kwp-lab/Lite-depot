@@ -32,11 +32,11 @@ function App() {
         <Route path="/setup" element={<SetupPage />} />
         
         {isConfigured ? (
-          <Route element={<Layout><div /></Layout>}>
-            <Route path="/inbound" element={<Layout><InboundPage /></Layout>} />
-            <Route path="/outbound" element={<Layout><OutboundPage /></Layout>} />
-            <Route path="/inventory" element={<Layout><InventoryPage /></Layout>} />
-            <Route path="/settings" element={<Layout><SettingsPage /></Layout>} />
+          <Route element={<Layout />}>
+            <Route path="/inbound" element={<InboundPage />} />
+            <Route path="/outbound" element={<OutboundPage />} />
+            <Route path="/inventory" element={<InventoryPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
             <Route path="/" element={<Navigate to="/inbound" replace />} />
             <Route path="*" element={<Navigate to="/inbound" replace />} />
           </Route>
