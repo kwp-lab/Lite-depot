@@ -1,5 +1,5 @@
 # 技术规格说明文档（Technical Specification）
-## 通用设备入库 / 出库 / 盘点客户端  
+## 通用货物入库 / 出库 / 盘点客户端  
 Electron + React + shadcn-UI + Zustand + IndexedDB  
 版本：V1  
 适配：Windows（优先）  
@@ -83,7 +83,7 @@ Electron + React + shadcn-UI + Zustand + IndexedDB
 | `api` | AITable 通信层统一封装 |
 | `db` | IndexedDB 本地数据缓存 |
 | `store` | Zustand 全局状态存储 |
-| `hooks` | 扫码、同步、设备操作相关 hooks |
+| `hooks` | 扫码、同步、货物操作相关 hooks |
 | `components` | 公共 UI 组件 |
 | `pages` | 4 大功能页：入库/出库/盘点/设置 |
 | `ipc` | 与主进程通信（日志写入） |
@@ -99,12 +99,12 @@ Electron + React + shadcn-UI + Zustand + IndexedDB
 ### 表结构：
 
 ### ✅ 5.1.1 products 表  
-从云端同步的设备列表（以远端为准）
+从云端同步的货物列表（以远端为准）
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| id | string | 设备唯一 ID（记录 ID） |
-| product_id | string | 设备编号（二维码） |
+| id | string | 货物唯一 ID（记录 ID） |
+| product_id | string | 货物编号（二维码） |
 | fields | object | AITable 返回的字段内容，动态结构 |
 | updated_at | number | 本地缓存更新时间戳 |
 
@@ -214,7 +214,7 @@ Store Modules
 ```
 store/
   configStore.ts      # 系统配置
-  productStore.ts      # 设备数据（包含 cloudProvider 状态）
+  productStore.ts      # 货物数据（包含 cloudProvider 状态）
   outboundStore.ts    # 出库篮（包含 cloudProvider 状态）
   inventoryStore.ts   # 盘点状态
   providerStore.ts    # Provider Hook（useProvider）
@@ -230,17 +230,17 @@ store/
 - 工号
 - 状态字段名（用户定义）
 
-## 7.2 productStore（设备列表）
+## 7.2 productStore（货物列表）
 
 状态：
-- `products` - 设备列表
+- `products` - 货物列表
 - `cloudProvider` - 当前使用的云服务类型
 
 提供方法：
 - `loadProductsFromDB()` - 从本地加载
 - `syncFromRemote(viewId?)` - 从云端同步（使用 ProviderFactory）
 - `getProductByCode(code)` - 根据编号查找
-- `updateProduct(id, fields)` - 更新设备（使用 ProviderFactory）
+- `updateProduct(id, fields)` - 更新货物（使用 ProviderFactory）
 - `setCloudProvider(provider)` - 设置云服务类型
 
 同步规则：
@@ -250,12 +250,12 @@ store/
 ## 7.3 outboundStore（批量出库篮）
 
 状态：
-- `items` - 出库设备列表
+- `items` - 出库货物列表
 - `cloudProvider` - 当前使用的云服务类型
 
 方法：
-- `addProduct(product)` - 添加设备
-- `removeProduct(id)` - 移除设备
+- `addProduct(product)` - 添加货物
+- `removeProduct(id)` - 移除货物
 - `submit(employeeId, statusField, borrowerField, outboundTimeField)` - 提交出库
 - `setCloudProvider(provider)` - 设置云服务类型
 
@@ -302,14 +302,14 @@ else {
 → 找到？ → 显示详情
             → 点击"入库"
             → 调用 updateRecord()
-→ 找不到？ → 显示 “未找到设备”
+→ 找不到？ → 显示 “未找到货物”
 ```
 
 9.2 出库流程（Outbound）
 ```
-出库模式 → 扫码 → 查找设备
+出库模式 → 扫码 → 查找货物
 → 在库状态？ → 加入出库篮
-→ 不在库？ → 提示“设备已出库”
+→ 不在库？ → 提示“货物已出库”
 → 输入借用人姓名 → 提交
 → 调用 batchUpdate（最多 10 条/次）
 ```
@@ -317,7 +317,7 @@ else {
 9.3 盘点流程（Inventory）
 ```
 进入盘点模式
-→ 扫码 → 查找对应设备
+→ 扫码 → 查找对应货物
 → 成功 → 更新 last_checked_at
 → 本地标记 scannedToday
 → 结束 → 比较 products - scannedToday → 未盘点列表
@@ -327,7 +327,7 @@ else {
 
 ## 10.1 手动同步流程：
 ```
-用户点击“同步设备列表”
+用户点击“同步货物列表”
 → 调用 aiTable.getRecords()
 → 覆盖 productStore + IndexedDB
 → 显示同步数量

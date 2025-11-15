@@ -6,7 +6,7 @@ import { Product, SystemConfig } from '../types';
  * Based on Technical Specification Section 5 (数据存储设计)
  * 
  * Tables:
- * - products: 从云端同步的设备列表（以远端为准）
+ * - products: 从云端同步的货物列表（以远端为准）
  * - system_config: 系统配置存储
  */
 export class InventoryDatabase extends Dexie {
@@ -70,14 +70,14 @@ export const dbHelpers = {
   },
 
   /**
-   * 根据设备编号查找设备（用于扫码查找）
+   * 根据货物编号查找货物（用于扫码查找）
    */
   async findProductByCode(code: string): Promise<Product | undefined> {
     return await db.products.where('product_id').equals(code).first();
   },
 
   /**
-   * 批量更新设备
+   * 批量更新货物
    */
   async bulkUpdateProducts(products: Product[]): Promise<void> {
     await db.products.bulkPut(products);

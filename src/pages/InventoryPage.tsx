@@ -40,14 +40,14 @@ export const InventoryPage: React.FC = () => {
     
     const product = getProductByCode(trimmedCode);
     if (!product) {
-      setMessage({ type: 'error', text: '找不到该设备' });
+      setMessage({ type: 'error', text: '找不到该货物' });
       setTimeout(() => setMessage(null), 2000);
       return;
     }
 
     // Check if already scanned
     if (scannedToday.has(product.product_id)) {
-      setMessage({ type: 'error', text: '该设备今日已盘点' });
+      setMessage({ type: 'error', text: '该货物今日已盘点' });
       setTimeout(() => setMessage(null), 2000);
       return;
     }
@@ -149,7 +149,7 @@ export const InventoryPage: React.FC = () => {
       <div className="bg-card border-b border-border p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">设备盘点</h1>
+            <h1 className="text-2xl font-bold">货物盘点</h1>
             <p className="text-sm text-muted-foreground mt-1">
               当前时间: {formatDate(new Date())}
             </p>
@@ -200,7 +200,7 @@ export const InventoryPage: React.FC = () => {
                         ref={inputRef}
                         value={scanCode}
                         onChange={(e) => setScanCode(e.target.value)}
-                        placeholder="扫描设备条码..."
+                        placeholder="扫描货物条码..."
                         className="text-lg"
                         autoFocus
                       />
@@ -248,7 +248,7 @@ export const InventoryPage: React.FC = () => {
                         {products.length}
                       </div>
                       <div className="text-sm text-muted-foreground mt-1">
-                        总设备数
+                        总货物数
                       </div>
                     </div>
                   </div>
@@ -294,7 +294,7 @@ export const InventoryPage: React.FC = () => {
                     <div className="flex items-center justify-between">
                       <CardTitle className="flex items-center">
                         <FileText className="w-5 h-5 mr-2" />
-                        未盘点设备 ({unscannedProducts.length})
+                        未盘点货物 ({unscannedProducts.length})
                       </CardTitle>
                       <Button variant="ghost" size="sm" onClick={() => setShowUnscanned(false)}>
                         返回
@@ -305,7 +305,7 @@ export const InventoryPage: React.FC = () => {
                     {unscannedProducts.length === 0 ? (
                       <div className="text-center text-green-600 py-8">
                         <CheckCircle className="w-12 h-12 mx-auto mb-2" />
-                        <p className="font-medium">所有设备已盘点完成！</p>
+                        <p className="font-medium">所有货物已盘点完成！</p>
                       </div>
                     ) : (
                       <div className="space-y-2 max-h-[600px] overflow-auto">

@@ -30,7 +30,7 @@ export const OutboundPage: React.FC = () => {
     
     const product = getProductByCode(trimmedCode);
     if (!product) {
-      setMessage({ type: 'error', text: '找不到该设备' });
+      setMessage({ type: 'error', text: '找不到该货物' });
       setTimeout(() => setMessage(null), 2000);
       return;
     }
@@ -38,14 +38,14 @@ export const OutboundPage: React.FC = () => {
     // Check if already outbound
     const statusField = config.status_field || 'status';
     if (product.fields[statusField] === '出库') {
-      setMessage({ type: 'error', text: '该设备已出库，无法重复添加' });
+      setMessage({ type: 'error', text: '该货物已出库，无法重复添加' });
       setTimeout(() => setMessage(null), 2000);
       return;
     }
 
     // Check if already in list
     if (items.some((item) => item.product.id === product.id)) {
-      setMessage({ type: 'error', text: '该设备已在出库列表中' });
+      setMessage({ type: 'error', text: '该货物已在出库列表中' });
       setTimeout(() => setMessage(null), 2000);
       return;
     }
@@ -128,7 +128,7 @@ export const OutboundPage: React.FC = () => {
       <div className="bg-card border-b border-border p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">设备出库</h1>
+            <h1 className="text-2xl font-bold">货物出库</h1>
             <p className="text-sm text-muted-foreground mt-1">
               当前时间: {formatDate(new Date())}
             </p>
@@ -156,7 +156,7 @@ export const OutboundPage: React.FC = () => {
                       ref={inputRef}
                       value={scanCode}
                       onChange={(e) => setScanCode(e.target.value)}
-                      placeholder="扫描设备条码..."
+                      placeholder="扫描货物条码..."
                       className="text-lg"
                       autoFocus
                     />
@@ -185,7 +185,7 @@ export const OutboundPage: React.FC = () => {
 
               <Card className="bg-muted">
                 <CardContent className="p-6 text-center text-muted-foreground">
-                  <p>扫描设备条码将其添加到右侧出库列表</p>
+                  <p>扫描货物条码将其添加到右侧出库列表</p>
                   <p className="text-sm mt-2">支持批量扫码</p>
                 </CardContent>
               </Card>
@@ -211,7 +211,7 @@ export const OutboundPage: React.FC = () => {
                 <CardContent>
                   {items.length === 0 ? (
                     <div className="text-center text-muted-foreground py-8">
-                      暂无待出库设备
+                      暂无待出库货物
                     </div>
                   ) : (
                     <div className="space-y-3 max-h-[400px] overflow-auto">

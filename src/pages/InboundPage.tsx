@@ -36,7 +36,7 @@ export const InboundPage: React.FC = () => {
       setMessage(null);
     } else {
       setCurrentProduct(null);
-      setMessage({ type: 'error', text: '找不到该设备' });
+      setMessage({ type: 'error', text: '找不到该货物' });
     }
   }, [getProductByCode]);
 
@@ -120,7 +120,7 @@ export const InboundPage: React.FC = () => {
       <div className="bg-card border-b border-border p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">设备入库</h1>
+            <h1 className="text-2xl font-bold">货物入库</h1>
             <p className="text-sm text-muted-foreground mt-1">
               当前时间: {formatDate(new Date())}
             </p>
@@ -146,7 +146,7 @@ export const InboundPage: React.FC = () => {
                   ref={inputRef}
                   value={scanCode}
                   onChange={(e) => setScanCode(e.target.value)}
-                  placeholder="扫描设备条码或手动输入..."
+                  placeholder="扫描货物条码或手动输入..."
                   className="text-lg col-span-10"
                   autoFocus
                 />
@@ -180,7 +180,7 @@ export const InboundPage: React.FC = () => {
           {currentProduct && (
             <Card>
               <CardHeader>
-                <CardTitle>设备信息</CardTitle>
+                <CardTitle>货物信息</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
@@ -219,7 +219,7 @@ export const InboundPage: React.FC = () => {
           {!currentProduct && !message && (
             <Card className="bg-muted">
               <CardContent className="p-6 text-center text-muted-foreground">
-                <p>请使用扫码枪扫描设备条码，或手动输入设备编号后点击查询</p>
+                <p>请使用扫码枪扫描货物条码，或手动输入货物编号后点击查询</p>
               </CardContent>
             </Card>
           )}

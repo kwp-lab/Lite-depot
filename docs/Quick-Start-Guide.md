@@ -7,12 +7,12 @@
 ### IndexedDB 数据库
 
 - **数据库名称**: `inventory_client_db`
-- **表**: `products` (设备列表), `system_config` (系统配置)
+- **表**: `products` (货物列表), `system_config` (系统配置)
 
 ### Store 模块
 
 - **configStore**: 系统配置管理
-- **productStore**: 设备数据管理
+- **productStore**: 货物数据管理
 - **outboundStore**: 出库篮管理
 - **inventoryStore**: 盘点状态管理
 
@@ -83,9 +83,9 @@ function App() {
 }
 ```
 
-## 3. 使用设备数据
+## 3. 使用货物数据
 
-### 从本地加载设备列表
+### 从本地加载货物列表
 
 ```typescript
 import { useProductStore } from '@/store';
@@ -94,13 +94,13 @@ function InboundPage() {
   const { products, loadProductsFromDB } = useProductStore();
   
   useEffect(() => {
-    // 从 IndexedDB 加载设备列表
+    // 从 IndexedDB 加载货物列表
     loadProductsFromDB();
   }, [loadProductsFromDB]);
   
   return (
     <div>
-      <h1>设备总数: {products.length}</h1>
+      <h1>货物总数: {products.length}</h1>
       {products.map(product => (
         <div key={product.id}>{product.product_id}</div>
       ))}
@@ -109,7 +109,7 @@ function InboundPage() {
 }
 ```
 
-### 从云端同步设备
+### 从云端同步货物
 
 ```typescript
 import { useProductStore, useConfigStore } from '@/store';
@@ -133,13 +133,13 @@ function SyncButton() {
   
   return (
     <button onClick={handleSync} disabled={isSyncing}>
-      {isSyncing ? '同步中...' : '同步设备列表'}
+      {isSyncing ? '同步中...' : '同步货物列表'}
     </button>
   );
 }
 ```
 
-### 扫码查找设备
+### 扫码查找货物
 
 ```typescript
 import { useProductStore } from '@/store';
@@ -154,10 +154,10 @@ function ScanHandler() {
         // 扫码完成
         const product = getProductByCode(buffer);
         if (product) {
-          console.log('找到设备:', product);
-          // 显示设备详情
+          console.log('找到货物:', product);
+          // 显示货物详情
         } else {
-          console.log('未找到设备');
+          console.log('未找到货物');
         }
         setBuffer('');
       } else {
@@ -176,7 +176,7 @@ function ScanHandler() {
 
 ## 4. 使用出库篮
 
-### 添加设备到出库篮
+### 添加货物到出库篮
 
 ```typescript
 import { useOutboundStore, useProductStore } from '@/store';
@@ -268,7 +268,7 @@ function InventoryPage() {
   
   const handleEnd = () => {
     const scanned = endInventory();
-    console.log('已盘点设备:', scanned);
+    console.log('已盘点货物:', scanned);
   };
   
   return (
@@ -314,10 +314,10 @@ const handleSave = async () => {
 ### 场景 3: 离线使用
 
 ```typescript
-// 1. 先在线同步设备列表
+// 1. 先在线同步货物列表
 await syncFromRemote();
 
-// 2. 断网后仍可查询设备
+// 2. 断网后仍可查询货物
 const product = getProductByCode('DEVICE001'); // 从本地 IndexedDB 查询
 ```
 
@@ -325,15 +325,15 @@ const product = getProductByCode('DEVICE001'); // 从本地 IndexedDB 查询
 
 ```typescript
 const handleScan = async (code: string) => {
-  // 1. 查找设备
+  // 1. 查找货物
   const product = getProductByCode(code);
   
   if (!product) {
-    alert('未找到设备');
+    alert('未找到货物');
     return;
   }
   
-  // 2. 更新设备状态
+  // 2. 更新货物状态
   await updateProduct(product.id, {
     [config.status_field!]: '在库',
     [config.inbound_time_field!]: new Date().toISOString(),
@@ -375,9 +375,9 @@ import { db } from '@/db';
 const configs = await db.system_config.toArray();
 console.log(configs);
 
-// 查看设备数量
+// 查看货物数量
 const productCount = await db.products.count();
-console.log('设备总数:', productCount);
+console.log('货物总数:', productCount);
 ```
 
 ## 8. 性能优化
@@ -432,11 +432,11 @@ try {
 ### Q: 配置没有保存？
 A: 检查是否调用了 `saveConfig()`，确保没有抛出异常。
 
-### Q: 设备列表为空？
-A: 先调用 `syncFromRemote()` 从云端同步设备。
+### Q: 货物列表为空？
+A: 先调用 `syncFromRemote()` 从云端同步货物。
 
-### Q: 扫码找不到设备？
-A: 确保已同步设备列表，检查设备编号是否匹配。
+### Q: 扫码找不到货物？
+A: 确保已同步货物列表，检查货物编号是否匹配。
 
 ### Q: 应用重启后配置丢失？
 A: 检查 IndexedDB 是否被清空，确保 `loadConfig()` 在应用启动时被调用。
