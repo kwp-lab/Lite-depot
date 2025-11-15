@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { Product } from '../types';
 import { db, dbHelpers } from '../db';
 import { ProviderFactory, CloudProviderType } from '../api';
+import { AppConfig } from '../types';
+import { BaseProvider } from '../api/base-provider';
 
 interface ProductState {
   products: Product[];
@@ -14,6 +16,9 @@ interface ProductState {
   getProductByCode: (code: string) => Product | undefined;
   updateProduct: (id: string, fields: Record<string, string | number | boolean | null | undefined>) => Promise<void>;
   clearProducts: () => Promise<void>;
+
+  // 可选：传入 config 的 ensure
+  ensureProvider: (config: AppConfig) => BaseProvider<any, any>;
 }
 
 /**
@@ -47,6 +52,18 @@ export const useProductStore = create<ProductState>((set, get) => ({
    */
   setCloudProvider: (provider: CloudProviderType) => {
     set({ cloudProvider: provider });
+  },
+
+  ensureProvider: (config) => {
+  const provider = ProviderFactory.getProvider(get().cloudProvider);
+    if (!provider.isInitialized()) {
+      provider.initialize({
+        apiKey: config.api_key,
+        spaceId: config.workspace_id,
+        datasheetId: config.products_datasheet_id,
+      });
+    }
+    return provider;
   },
 
   /**
@@ -98,15 +115,17 @@ export const useProductStore = create<ProductState>((set, get) => ({
       
       // 转换并保存记录到 IndexedDB
       const products: Product[] = records.map(record => {
-        // 尝试从不同字段获取货品 ID（兼容不同命名）
-        const productId = record.fields.product_id || record.fields.Product_ID || record.id;
+        // 从 “SKU” 字段获取货品编号, 作为 product_id, 你也可以根据实际字段名称调整
+        const productId = record.fields["SKU"];
         return {
-          id: record.id,
+          id: record.recordId,
           product_id: String(productId),
           fields: record.fields,
           updated_at: Date.now(),
         };
       });
+
+      console.log('Syncing products from remote:', products);
       
       // 批量保存到 IndexedDB
       await db.products.bulkPut(products);

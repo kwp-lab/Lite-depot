@@ -166,7 +166,7 @@ api/
 根据配置返回对应的 Provider 实例：
 ```ts
 const provider = ProviderFactory.getProvider('aitable')
-provider.initialize({ apiKey, baseId, tableId })
+provider.initialize({ apiKey, spaceId, datasheetId })
 ```
 
 #### AITableProvider（AITable 实现）

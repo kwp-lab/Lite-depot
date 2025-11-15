@@ -9,7 +9,7 @@ import { InventoryPage } from './pages/InventoryPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { useConfigStore, useProductStore } from './store';
 import { useOutboundStore } from './store/outboundStore';
-import { ProviderFactory, CloudProviderType } from './api';
+import { CloudProviderType } from './api';
 
 function App() {
   const { config, isConfigured, loadConfig } = useConfigStore();
@@ -23,14 +23,8 @@ function App() {
 
   useEffect(() => {
     // Initialize Provider when config is loaded
-    if (isConfigured && config.api_key && config.workspace_id && config.datasheet_id) {
+    if (isConfigured) {
       const providerType = (config.cloud_provider || 'aitable') as CloudProviderType;
-      const provider = ProviderFactory.getProvider(providerType);
-      provider.initialize({
-        apiKey: config.api_key,
-        baseId: config.workspace_id,
-        tableId: config.datasheet_id,
-      });
       setCloudProvider(providerType);
       setOutboundCloudProvider(providerType);
       loadProductsFromDB();

@@ -19,12 +19,12 @@ export class InventoryDatabase extends Dexie {
     // Version 1 Schema
     this.version(1).stores({
       // products 表
-      // 索引: id (primary), product_id (用于扫码快速查找), updated_at
-      products: 'id, product_id, updated_at',
+      // 索引: id (primary), product_id
+      products: 'id, product_id',
       
       // system_config 表
       // 索引: key (primary)
-      // 存储内容：云服务提供者、工号、API Key、Base/Table/View ID、状态字段名、扫码配置、UI配置
+      // 存储内容：云服务提供者、员工、API Key、Base/Table/View ID、状态字段名、扫码配置、UI配置
       system_config: 'key',
     });
   }

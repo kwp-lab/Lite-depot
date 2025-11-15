@@ -12,13 +12,18 @@ interface FieldSchemaResponse {
 }
 
 interface RecordsResponse {
-  records: AITableRecord[];
+  code: number;
+  success: boolean;
+  message: string;
+  data: {
+    records: AITableRecord[];
+  };
 }
 
 interface AITableConfig {
   apiKey: string;
-  baseId: string;
-  tableId: string;
+  spaceId: string;
+  datasheetId: string;
 }
 
 /**
@@ -27,39 +32,39 @@ interface AITableConfig {
  */
 export class AITableProvider extends BaseProvider<AITableRecord, AITableSchema> {
   private http: HttpClient | null = null;
-  private baseId: string = '';
-  private tableId: string = '';
+  private spaceId: string = '';
+  private datasheetId: string = '';
 
   /**
    * 初始化 AITable 服务
-   * @param config 包含 apiKey, baseId, tableId 的配置对象
+   * @param config 包含 apiKey, spaceId, datasheetId 的配置对象
    */
   initialize(config: AITableConfig): void;
-  initialize(apiKey: string, baseId: string, tableId: string): void;
-  initialize(configOrApiKey: AITableConfig | string, baseId?: string, tableId?: string): void {
+  initialize(apiKey: string, spaceId: string, datasheetId: string): void;
+  initialize(configOrApiKey: AITableConfig | string, spaceId?: string, datasheetId?: string): void {
     if (typeof configOrApiKey === 'object') {
       const config = configOrApiKey;
       const baseURL = 'https://aitable.ai/fusion/v1';
       this.http = new HttpClient(baseURL, config.apiKey);
-      this.baseId = config.baseId;
-      this.tableId = config.tableId;
+      this.spaceId = config.spaceId;
+      this.datasheetId = config.datasheetId;
     } else {
       const apiKey = configOrApiKey;
       const baseURL = 'https://aitable.ai/fusion/v1';
       this.http = new HttpClient(baseURL, apiKey);
-      this.baseId = baseId!;
-      this.tableId = tableId!;
+      this.spaceId = spaceId!;
+      this.datasheetId = datasheetId!;
     }
   }
 
   isInitialized(): boolean {
-    return this.http !== null && !!this.baseId && !!this.tableId;
+    return this.http !== null && !!this.spaceId && !!this.datasheetId;
   }
 
   async getSchema(): Promise<AITableSchema> {
     if (!this.http) throw new Error('AITable service not initialized');
 
-    const url = `/datasheets/${this.tableId}/fields`;
+    const url = `/datasheets/${this.datasheetId}/fields`;
     const response = await this.http.get<FieldSchemaResponse>(url);
     
     if (!response.success || !response.data) {
@@ -72,36 +77,39 @@ export class AITableProvider extends BaseProvider<AITableRecord, AITableSchema> 
   async getRecords(viewId?: string): Promise<AITableRecord[]> {
     if (!this.http) throw new Error('AITable service not initialized');
     
-    const url = `/${this.baseId}/${this.tableId}`;
-    const params: Record<string, unknown> = { maxRecords: 10000 };
+    const url = `/datasheets/${this.datasheetId}/records`;
+    const params: Record<string, unknown> = { maxRecords: 100, fieldKey: "name" };
     
     if (viewId) {
       params.view = viewId;
     }
     
     const response = await this.http.get<RecordsResponse>(url, params);
-    return response.records || [];
+    return response.data.records || [];
   }
 
   async createRecord(fields: Record<string, any>): Promise<AITableRecord> {
     if (!this.http) throw new Error('AITable service not initialized');
     
-    const url = `/${this.baseId}/${this.tableId}`;
-    const response = await this.http.post<{ record: AITableRecord }>(url, { fields });
+    const url = `/datasheets/${this.datasheetId}/records`;
+    const response = await this.http.post<{ record: AITableRecord }>(url, { 
+      records: [{ fields }],
+      fieldKey: "name"
+     });
     return response.record;
   }
 
   async batchCreate(records: Array<{ fields: Record<string, any> }>): Promise<AITableRecord[]> {
     if (!this.http) throw new Error('AITable service not initialized');
     
-    const url = `/${this.baseId}/${this.tableId}`;
+    const url = `/datasheets/${this.datasheetId}/records`;
     const batchSize = 10;
     const results: AITableRecord[] = [];
     
     for (let i = 0; i < records.length; i += batchSize) {
       const batch = records.slice(i, i + batchSize);
-      const response = await this.http.post<RecordsResponse>(url, { records: batch });
-      results.push(...(response.records || []));
+      const response = await this.http.post<RecordsResponse>(url, { records: batch, fieldKey: "name" });
+      results.push(...(response.data.records || []));
     }
     
     return results;
@@ -110,22 +118,25 @@ export class AITableProvider extends BaseProvider<AITableRecord, AITableSchema> 
   async updateRecord(id: string, fields: Record<string, any>): Promise<AITableRecord> {
     if (!this.http) throw new Error('AITable service not initialized');
     
-    const url = `/${this.baseId}/${this.tableId}/${id}`;
-    const response = await this.http.patch<AITableRecord>(url, { fields });
+    const url = `/datasheets/${this.datasheetId}/records`;
+    const response = await this.http.patch<AITableRecord>(url, { 
+      records: [{ recordId: id, fields }],
+      fieldKey: "name"
+    });
     return response;
   }
 
   async batchUpdate(records: Array<{ id: string; fields: Record<string, any> }>): Promise<AITableRecord[]> {
     if (!this.http) throw new Error('AITable service not initialized');
     
-    const url = `/${this.baseId}/${this.tableId}`;
+    const url = `/datasheets/${this.datasheetId}/records`;
     const batchSize = 10;
     const results: AITableRecord[] = [];
     
     for (let i = 0; i < records.length; i += batchSize) {
-      const batch = records.slice(i, i + batchSize);
-      const response = await this.http.patch<RecordsResponse>(url, { records: batch });
-      results.push(...(response.records || []));
+      const batch = records.slice(i, i + batchSize).map(r => ({ recordId: r.id, fields: r.fields }));
+      const response = await this.http.patch<RecordsResponse>(url, { records: batch, fieldKey: "name" });
+      results.push(...(response.data.records || []));
     }
     
     return results;
@@ -134,22 +145,20 @@ export class AITableProvider extends BaseProvider<AITableRecord, AITableSchema> 
   async deleteRecord(id: string): Promise<boolean> {
     if (!this.http) throw new Error('AITable service not initialized');
     
-    const url = `/${this.baseId}/${this.tableId}/${id}`;
-    await this.http.delete(url);
+    const url = `/datasheets/${this.datasheetId}/records`;
+    await this.http.delete(url, { recordIds: [id] });
     return true;
   }
 
   async batchDelete(ids: string[]): Promise<boolean> {
     if (!this.http) throw new Error('AITable service not initialized');
     
+    const url = `/datasheets/${this.datasheetId}/records`;
     const batchSize = 10;
     
     for (let i = 0; i < ids.length; i += batchSize) {
       const batch = ids.slice(i, i + batchSize);
-      for (const id of batch) {
-        const url = `/${this.baseId}/${this.tableId}/${id}`;
-        await this.http.delete(url);
-      }
+      await this.http.delete(url, { recordIds: batch });
     }
     
     return true;

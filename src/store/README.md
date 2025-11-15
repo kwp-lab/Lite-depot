@@ -248,8 +248,8 @@ useEffect(() => {
       const provider = ProviderFactory.getProvider(config.cloud_provider);
       provider.initialize({
         apiKey: config.api_key,
-        baseId: config.workspace_id,
-        tableId: config.datasheet_id,
+        spaceId: config.workspace_id,
+        datasheetId: config.datasheet_id,
       });
       
       // 3. 设置各 Store 的 cloudProvider

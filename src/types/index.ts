@@ -9,9 +9,8 @@ export interface AITableField {
 }
 
 export interface AITableRecord {
-  id: string;
+  recordId: string;
   fields: Record<string, any>;
-  createdTime?: string;
 }
 
 export interface AITableSchema {
@@ -20,13 +19,6 @@ export interface AITableSchema {
 
 // Provider related types
 export interface ProviderConfig {
-  [key: string]: any;
-}
-
-export interface ProviderRecord {
-  id: string;
-  fields: Record<string, any>;
-  createdTime?: string;
   [key: string]: any;
 }
 
@@ -55,16 +47,16 @@ export interface SystemConfig {
 
 export interface AppConfig {
   cloud_provider: string; // 云服务提供者，如 'aitable', 'notion' 等
-  employee_id: string;
+  employee_name: string;
   api_key: string;
   workspace_id: string;
-  datasheet_id: string;
-  view_id: string;
-  status_field: string;
-  borrower_field: string;
-  inbound_time_field: string;
-  outbound_time_field: string;
-  checked_time_field: string;
+  products_datasheet_id: string;
+  transactions_datasheet_id: string;
+  sku_field: string;
+  type_field: string;
+  quantity_field: string;
+  operator_field: string;
+  time_field: string;
   fullscreen_mode: boolean;
   offline_enabled: boolean;
 }

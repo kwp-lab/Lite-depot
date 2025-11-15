@@ -20,7 +20,7 @@ interface ConfigState {
  * - 云服务提供者类型 (cloud_provider)
  * - 云服务相关配置 (API Key, Workspace ID, Datasheet ID 等)
  * - 扫码设置
- * - 工号
+ * - 员工
  * - 状态字段名（用户定义）
  * - UI 配置（主题、全屏模式等）
  * 
@@ -56,8 +56,9 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
       const isConfigured = !!(
         config.api_key &&
         config.workspace_id &&
-        config.datasheet_id &&
-        config.employee_id
+        config.products_datasheet_id &&
+        config.transactions_datasheet_id &&
+        config.employee_name
       );
       
       set({ config, isConfigured, isLoading: false });
@@ -88,8 +89,9 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
       const isConfigured = !!(
         config.api_key &&
         config.workspace_id &&
-        config.datasheet_id &&
-        config.employee_id
+        config.products_datasheet_id &&
+        config.transactions_datasheet_id &&
+        config.employee_name
       );
       
       set({ config, isConfigured });

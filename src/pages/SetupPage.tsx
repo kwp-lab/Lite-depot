@@ -13,14 +13,15 @@ export const SetupPage: React.FC = () => {
   
   const [formData, setFormData] = useState({
     cloud_provider: 'aitable',
-    employee_id: '',
+    employee_name: '',
     api_key: '',
     workspace_id: '',
-    datasheet_id: '',
-    view_id: '',
+    products_datasheet_id: '',
+    transactions_datasheet_id: '',
+    // view_id: '',
     status_field: 'status',
-    borrower_field: 'borrower',
-    inbound_time_field: 'inbound_time',
+    operator_field: 'borrower',
+    time_field: 'inbound_time',
     outbound_time_field: 'outbound_time',
     checked_time_field: 'last_checked_at',
   });
@@ -39,7 +40,7 @@ export const SetupPage: React.FC = () => {
       setIsLoading(true);
       
       // Validate required fields
-      if (!formData.employee_id || !formData.api_key || !formData.workspace_id || !formData.datasheet_id) {
+      if (!formData.employee_name || !formData.api_key || !formData.workspace_id || !formData.products_datasheet_id || !formData.transactions_datasheet_id) {
         alert('请填写所有必填字段');
         return;
       }
@@ -48,8 +49,8 @@ export const SetupPage: React.FC = () => {
       const provider = ProviderFactory.getProvider(formData.cloud_provider as any);
       provider.initialize({
         apiKey: formData.api_key,
-        baseId: formData.workspace_id,
-        tableId: formData.datasheet_id,
+        spaceId: formData.workspace_id,
+        datasheetId: formData.products_datasheet_id,
       });
       
       // Test connection by trying to fetch schema
@@ -88,12 +89,12 @@ export const SetupPage: React.FC = () => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2">工号 *</label>
+              <label className="block text-sm font-medium mb-2">员工 *</label>
               <Input
-                name="employee_id"
-                value={formData.employee_id}
+                name="employee_name"
+                value={formData.employee_name}
                 onChange={handleChange}
-                placeholder="请输入您的工号"
+                placeholder="请输入员工姓名"
                 required
               />
             </div>
@@ -113,42 +114,46 @@ export const SetupPage: React.FC = () => {
               </p>
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Workspace ID *</label>
-                <Input
-                  name="workspace_id"
-                  value={formData.workspace_id}
-                  onChange={handleChange}
-                  placeholder="spc..."
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-2">Datasheet ID *</label>
-                <Input
-                  name="datasheet_id"
-                  value={formData.datasheet_id}
-                  onChange={handleChange}
-                  placeholder="dst..."
-                  required
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Workspace ID *</label>
+              <Input
+                name="workspace_id"
+                value={formData.workspace_id}
+                onChange={handleChange}
+                placeholder="spc..."
+                required
+              />
             </div>
             
             <div>
-              <label className="block text-sm font-medium mb-2">View ID (可选)</label>
+              <label className="block text-sm font-medium mb-2">货品表 Datasheet ID (Products) *</label>
               <Input
-                name="view_id"
-                value={formData.view_id}
+                name="products_datasheet_id"
+                value={formData.products_datasheet_id}
                 onChange={handleChange}
-                placeholder="viw..."
+                placeholder="dst..."
+                required
               />
               <p className="text-xs text-muted-foreground mt-1">
-                留空表示使用默认视图
+                包含字段：SKU, Product Name, Category, Unit
               </p>
             </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-2">库存流水表 Datasheet ID (StockTransactions) *</label>
+              <Input
+                name="transactions_datasheet_id"
+                value={formData.transactions_datasheet_id}
+                onChange={handleChange}
+                placeholder="dst..."
+                required
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                包含字段：ID, SKU, Type (in/out), Quantity, EmployeeID, Date
+              </p>
+            </div>
+            
+
             
             <div className="pt-4">
               <h3 className="text-sm font-medium mb-3">字段配置（可选，使用默认值）</h3>
@@ -167,8 +172,8 @@ export const SetupPage: React.FC = () => {
                 <div>
                   <label className="block text-xs text-muted-foreground mb-1">借用人字段名</label>
                   <Input
-                    name="borrower_field"
-                    value={formData.borrower_field}
+                    name="operator_field"
+                    value={formData.operator_field}
                     onChange={handleChange}
                     placeholder="borrower"
                   />

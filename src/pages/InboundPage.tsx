@@ -5,11 +5,12 @@ import { Button } from '@/components/Button';
 import { useConfigStore, useProductStore } from '@/store';
 import { Product } from '@/types';
 import { formatDate } from '@/lib/utils';
-import { Loader2, CheckCircle, AlertCircle, Search } from 'lucide-react';
+import { Loader2, CheckCircle, AlertCircle, Search, LogIn } from 'lucide-react';
+import { ProviderFactory, CloudProviderType } from '../api';
 
 export const InboundPage: React.FC = () => {
   const { config } = useConfigStore();
-  const { getProductByCode, updateProduct, loadProductsFromDB } = useProductStore();
+  const { getProductByCode, loadProductsFromDB } = useProductStore();
   
   const [scanCode, setScanCode] = useState('');
   const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
@@ -19,6 +20,13 @@ export const InboundPage: React.FC = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const scanBufferRef = useRef('');
   const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  const provider = ProviderFactory.getProvider(config.cloud_provider as CloudProviderType);
+  provider.initialize({
+    apiKey: config.api_key,
+    spaceId: config.workspace_id,
+    datasheetId: config.transactions_datasheet_id,
+  });
 
   useEffect(() => {
     loadProductsFromDB();
@@ -88,14 +96,21 @@ export const InboundPage: React.FC = () => {
     
     try {
       setIsProcessing(true);
-      
+
+      if (!provider.isInitialized()) {
+        throw new Error('系统未配置完整，无法进行入库操作');
+      }
+
       const fields: Record<string, string | number | boolean | null | undefined> = {
-        [config.status_field || 'status']: '在库',
-        [config.inbound_time_field || 'inbound_time']: new Date().toISOString(),
-        operator: config.employee_id,
+        [config.sku_field || 'SKU']: currentProduct.product_id,
+        [config.type_field || 'Type']: 'in',
+        [config.quantity_field || 'Quantity']: '1',
+        [config.operator_field || 'Employee']: config.employee_name || '未知',
+        [config.time_field || 'Date']: new Date().toISOString(),
       };
-      
-      await updateProduct(currentProduct.id, fields);
+
+      console.log('Creating record with fields:', fields);
+      await provider.createRecord(fields);
       
       setMessage({ type: 'success', text: '入库成功！' });
       setCurrentProduct(null);
@@ -127,7 +142,7 @@ export const InboundPage: React.FC = () => {
           </div>
           <div className="text-right">
             <p className="text-sm text-muted-foreground">操作员</p>
-            <p className="font-medium">{config.employee_id || '未设置'}</p>
+            <p className="font-medium">{config.employee_name || '未设置'}</p>
           </div>
         </div>
       </div>
@@ -180,7 +195,12 @@ export const InboundPage: React.FC = () => {
           {currentProduct && (
             <Card>
               <CardHeader>
-                <CardTitle>货品信息</CardTitle>
+                <CardTitle>
+                  货品信息
+                  <span className="text-sm text-muted-foreground mt-1 ml-2">
+                    ({currentProduct.id})
+                  </span>
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
@@ -209,6 +229,7 @@ export const InboundPage: React.FC = () => {
                     ) : (
                       '确认入库'
                     )}
+                    <LogIn className="ml-2 h-5 w-5" />
                   </Button>
                 </div>
               </CardContent>

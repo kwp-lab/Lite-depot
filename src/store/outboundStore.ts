@@ -11,7 +11,7 @@ interface OutboundState {
   addProduct: (product: Product) => void;
   removeProduct: (productId: string) => void;
   setBorrowerName: (name: string) => void;
-  submit: (employeeId: string, statusField: string, borrowerField: string, outboundTimeField: string) => Promise<void>;
+  submit: (employeeName: string, statusField: string, borrowerField: string, outboundTimeField: string) => Promise<void>;
   clear: () => void;
 }
 
@@ -92,12 +92,12 @@ export const useOutboundStore = create<OutboundState>((set, get) => ({
    * 批量更新货品状态，调用 Provider 的 batchUpdate 方法
    * 如果超过 10 条，Provider 会自动拆分为多批处理
    * 
-   * @param employeeId - 操作员工号
+   * @param employeeName - 操作员员工
    * @param statusField - 状态字段名
    * @param borrowerField - 借用人字段名
    * @param outboundTimeField - 出库时间字段名
    */
-  submit: async (employeeId: string, statusField: string, borrowerField: string, outboundTimeField: string) => {
+  submit: async (employeeName: string, statusField: string, borrowerField: string, outboundTimeField: string) => {
     const { items, borrowerName } = get();
     
     // 验证出库篮不为空
@@ -120,7 +120,7 @@ export const useOutboundStore = create<OutboundState>((set, get) => ({
           [statusField]: '出库',
           [borrowerField]: borrowerName,
           [outboundTimeField]: new Date().toISOString(),
-          operator: employeeId,
+          operator: employeeName,
         },
       }));
       

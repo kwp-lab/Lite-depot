@@ -53,8 +53,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
         <div className="bg-muted rounded-md p-4">
           <div className="space-y-2">
             <div className="text-sm">
-              <span className="text-muted-foreground">工号: </span>
-              <span className="font-medium">{config.employee_id || '未设置'}</span>
+              <span className="text-muted-foreground">员工: </span>
+              <span className="font-medium">{config.employee_name || '未设置'}</span>
             </div>
             {config.workspace_id && (
               <div className="text-xs text-muted-foreground">

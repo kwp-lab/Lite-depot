@@ -99,9 +99,9 @@ export const OutboundPage: React.FC = () => {
   const handleSubmit = async () => {
     try {
       await submit(
-        config.employee_id || '',
+        config.employee_name || '',
         config.status_field || 'status',
-        config.borrower_field || 'borrower',
+        config.operator_field || 'borrower',
         config.outbound_time_field || 'outbound_time'
       );
       
@@ -135,7 +135,7 @@ export const OutboundPage: React.FC = () => {
           </div>
           <div className="text-right">
             <p className="text-sm text-muted-foreground">操作员</p>
-            <p className="font-medium">{config.employee_id || '未设置'}</p>
+            <p className="font-medium">{config.employee_name || '未设置'}</p>
           </div>
         </div>
       </div>

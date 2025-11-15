@@ -156,7 +156,7 @@ export const InventoryPage: React.FC = () => {
           </div>
           <div className="text-right">
             <p className="text-sm text-muted-foreground">操作员</p>
-            <p className="font-medium">{config.employee_id || '未设置'}</p>
+            <p className="font-medium">{config.employee_name || '未设置'}</p>
           </div>
         </div>
       </div>
