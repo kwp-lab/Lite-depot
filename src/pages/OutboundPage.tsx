@@ -2,14 +2,14 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/Card';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
-import { useConfigStore, useDeviceStore, useOutboundStore } from '@/store';
+import { useConfigStore, useProductStore, useOutboundStore } from '@/store';
 import { formatDate } from '@/lib/utils';
 import { CheckCircle, AlertCircle, Trash2, Package } from 'lucide-react';
 
 export const OutboundPage: React.FC = () => {
   const { config } = useConfigStore();
-  const { getDeviceByCode, loadDevicesFromDB } = useDeviceStore();
-  const { items, borrowerName, setBorrowerName, addDevice, removeDevice, submit, clear } = useOutboundStore();
+  const { getProductByCode, loadProductsFromDB } = useProductStore();
+  const { items, borrowerName, setBorrowerName, addProduct, removeProduct, submit, clear } = useOutboundStore();
   
   const [scanCode, setScanCode] = useState('');
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -19,8 +19,8 @@ export const OutboundPage: React.FC = () => {
   const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
-    loadDevicesFromDB();
-  }, [loadDevicesFromDB]);
+    loadProductsFromDB();
+  }, [loadProductsFromDB]);
 
   const handleScan = useCallback((code: string) => {
     const trimmedCode = code.trim();
@@ -28,8 +28,8 @@ export const OutboundPage: React.FC = () => {
 
     setScanCode(trimmedCode);
     
-    const device = getDeviceByCode(trimmedCode);
-    if (!device) {
+    const product = getProductByCode(trimmedCode);
+    if (!product) {
       setMessage({ type: 'error', text: '找不到该设备' });
       setTimeout(() => setMessage(null), 2000);
       return;
@@ -37,25 +37,25 @@ export const OutboundPage: React.FC = () => {
 
     // Check if already outbound
     const statusField = config.status_field || 'status';
-    if (device.fields[statusField] === '出库') {
+    if (product.fields[statusField] === '出库') {
       setMessage({ type: 'error', text: '该设备已出库，无法重复添加' });
       setTimeout(() => setMessage(null), 2000);
       return;
     }
 
     // Check if already in list
-    if (items.some((item) => item.device.id === device.id)) {
+    if (items.some((item) => item.product.id === product.id)) {
       setMessage({ type: 'error', text: '该设备已在出库列表中' });
       setTimeout(() => setMessage(null), 2000);
       return;
     }
 
-    addDevice(device);
+    addProduct(product);
     setMessage({ type: 'success', text: '添加成功' });
     setScanCode('');
     inputRef.current?.focus();
     setTimeout(() => setMessage(null), 1500);
-  }, [getDeviceByCode, config.status_field, items, addDevice]);
+  }, [getProductByCode, config.status_field, items, addProduct]);
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -217,7 +217,7 @@ export const OutboundPage: React.FC = () => {
                     <div className="space-y-3 max-h-[400px] overflow-auto">
                       {items.map((item, index) => (
                         <div
-                          key={item.device.id}
+                          key={item.product.id}
                           className="flex items-start justify-between p-3 bg-muted rounded-md"
                         >
                           <div className="flex-1">
@@ -226,11 +226,11 @@ export const OutboundPage: React.FC = () => {
                                 #{index + 1}
                               </span>
                               <span className="font-medium">
-                                {item.device.device_id}
+                                {item.product.product_id}
                               </span>
                             </div>
                             <div className="text-sm text-muted-foreground mt-1">
-                              {Object.entries(item.device.fields)
+                              {Object.entries(item.product.fields)
                                 .slice(0, 2)
                                 .map(([key, value]: [string, unknown]) => (
                                   <div key={key}>
@@ -242,7 +242,7 @@ export const OutboundPage: React.FC = () => {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => removeDevice(item.device.id)}
+                            onClick={() => removeProduct(item.product.id)}
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>

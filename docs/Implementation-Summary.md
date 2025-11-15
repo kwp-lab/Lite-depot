@@ -9,9 +9,9 @@
 ### ✅ 1. 数据库 Schema（`src/db/index.ts`）
 
 - [x] 创建 `inventory_client_db` 数据库
-- [x] 实现 `devices` 表（设备列表）
-  - 字段: `id`, `device_id`, `fields`, `updated_at`
-  - 索引: `id`, `device_id`, `updated_at`
+- [x] 实现 `products` 表（设备列表）
+  - 字段: `id`, `product_id`, `fields`, `updated_at`
+  - 索引: `id`, `product_id`, `updated_at`
 - [x] 实现 `system_config` 表（系统配置）
   - 字段: `key`, `value`
   - 索引: `key`
@@ -25,18 +25,18 @@
 - [x] `clearConfig()` - 清除所有配置
 - [x] `isConfigured` 状态检查
 
-### ✅ 3. 设备数据存储（`src/store/deviceStore.ts`）
+### ✅ 3. 设备数据存储（`src/store/productStore.ts`）
 
-- [x] `loadDevicesFromDB()` - 从本地加载设备
+- [x] `loadProductsFromDB()` - 从本地加载设备
 - [x] `syncFromRemote()` - 从云端同步（以远端为准）
-- [x] `getDeviceByCode()` - 扫码查找设备
-- [x] `updateDevice()` - 更新设备信息
-- [x] `clearDevices()` - 清空设备缓存
+- [x] `getProductByCode()` - 扫码查找设备
+- [x] `updateProduct()` - 更新设备信息
+- [x] `clearProducts()` - 清空设备缓存
 
 ### ✅ 4. 出库篮存储（`src/store/outboundStore.ts`）
 
-- [x] `addDevice()` - 添加设备到出库篮
-- [x] `removeDevice()` - 移除设备
+- [x] `addProduct()` - 添加设备到出库篮
+- [x] `removeProduct()` - 移除设备
 - [x] `submit()` - 批量提交出库
 - [x] `clear()` - 清空出库篮
 
@@ -95,7 +95,7 @@ loadConfig() → 加载配置
   ↓
 setCloudProvider() → 设置各 Store
   ↓
-loadDevicesFromDB() → 加载设备缓存
+loadProductsFromDB() → 加载设备缓存
 ```
 
 ## 📊 数据流图
@@ -148,7 +148,7 @@ src/db/index.ts
 ```
 src/store/
   - configStore.ts     (配置管理)
-  - deviceStore.ts     (设备管理)
+  - productStore.ts     (设备管理)
   - outboundStore.ts   (出库管理)
   - inventoryStore.ts  (盘点管理)
 ```

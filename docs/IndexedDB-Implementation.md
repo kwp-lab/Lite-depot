@@ -11,9 +11,9 @@
 - **数据库名称**: `inventory_client_db`
 - **版本**: 1
 
-#### devices 表
-- 字段: `id`, `device_id`, `fields`, `updated_at`
-- 索引: `id` (主键), `device_id` (扫码查找), `updated_at` (同步追踪)
+#### products 表
+- 字段: `id`, `product_id`, `fields`, `updated_at`
+- 索引: `id` (主键), `product_id` (扫码查找), `updated_at` (同步追踪)
 - 用途: 缓存从云端同步的设备列表
 
 #### system_config 表
@@ -26,8 +26,8 @@
 - `getConfig()`: 获取单个配置项
 - `setConfigs()`: 批量保存配置
 - `getAllConfigs()`: 获取所有配置
-- `findDeviceByCode()`: 根据设备编号查找（扫码场景）
-- `bulkUpdateDevices()`: 批量更新设备
+- `findProductByCode()`: 根据设备编号查找（扫码场景）
+- `bulkUpdateProducts()`: 批量更新设备
 - `clearAll()`: 清空所有数据
 
 ### ✅ 2. 配置存储（src/store/configStore.ts）
@@ -59,7 +59,7 @@ await saveConfig({
 });
 ```
 
-### ✅ 3. 设备数据存储（src/store/deviceStore.ts）
+### ✅ 3. 设备数据存储（src/store/productStore.ts）
 
 **功能**:
 - 从 IndexedDB 加载设备列表
@@ -75,16 +75,16 @@ await saveConfig({
 
 **使用示例**:
 ```typescript
-const { devices, loadDevicesFromDB, syncFromRemote, getDeviceByCode } = useDeviceStore();
+const { products, loadProductsFromDB, syncFromRemote, getProductByCode } = useProductStore();
 
 // 加载本地缓存
-await loadDevicesFromDB();
+await loadProductsFromDB();
 
 // 从云端同步
 await syncFromRemote(viewId);
 
 // 扫码查找设备
-const device = getDeviceByCode('DEVICE001');
+const product = getProductByCode('DEVICE001');
 ```
 
 ### ✅ 4. 出库篮存储（src/store/outboundStore.ts）
@@ -102,10 +102,10 @@ const device = getDeviceByCode('DEVICE001');
 
 **使用示例**:
 ```typescript
-const { items, addDevice, submit } = useOutboundStore();
+const { items, addProduct, submit } = useOutboundStore();
 
 // 添加设备
-addDevice(device);
+addProduct(product);
 
 // 提交出库
 await submit(employeeId, statusField, borrowerField, outboundTimeField);
@@ -121,7 +121,7 @@ await submit(employeeId, statusField, borrowerField, outboundTimeField);
 
 **业务逻辑**:
 - 盘点数据仅存储在内存中（不持久化）
-- 使用 Map 记录 {device_id: timestamp}
+- 使用 Map 记录 {product_id: timestamp}
 - 结束盘点时返回已扫描设备列表
 
 **使用示例**:
@@ -132,7 +132,7 @@ const { scannedToday, startInventory, markScanned, endInventory } = useInventory
 startInventory();
 
 // 扫码标记
-markScanned(deviceId);
+markScanned(productId);
 
 // 结束盘点
 const scanned = endInventory();
@@ -201,19 +201,19 @@ configStore.saveConfig() → 更新 IndexedDB
 ```
 用户点击"同步设备列表"
   ↓
-deviceStore.syncFromRemote(viewId)
+productStore.syncFromRemote(viewId)
   ↓
 使用 ProviderFactory 获取 Provider
   ↓
 调用 provider.getRecords(viewId)
   ↓
-清空 devices 表（以远端为准）
+清空 products 表（以远端为准）
   ↓
 转换记录格式
   ↓
 批量写入 IndexedDB (bulkPut)
   ↓
-更新内存中的 devices
+更新内存中的 products
   ↓
 记录 lastSyncTime
   ↓
@@ -229,9 +229,9 @@ deviceStore.syncFromRemote(viewId)
   ↓
 触发 Enter 键（结束输入）
   ↓
-deviceStore.getDeviceByCode(code)
+productStore.getProductByCode(code)
   ↓
-在内存中的 devices 数组查找
+在内存中的 products 数组查找
   ↓
 找到设备 → 显示详情 → 点击入库
   ↓
@@ -243,11 +243,11 @@ deviceStore.getDeviceByCode(code)
 ```
 扫码枪输入设备编号
   ↓
-deviceStore.getDeviceByCode(code)
+productStore.getProductByCode(code)
   ↓
 检查设备状态 = '在库'?
   ↓
-是 → outboundStore.addDevice(device)
+是 → outboundStore.addProduct(product)
   ↓
 否 → 提示"设备已出库"
 ```
@@ -257,9 +257,9 @@ deviceStore.getDeviceByCode(code)
 ```
 扫码枪输入设备编号
   ↓
-deviceStore.getDeviceByCode(code)
+productStore.getProductByCode(code)
   ↓
-找到设备 → inventoryStore.markScanned(deviceId)
+找到设备 → inventoryStore.markScanned(productId)
   ↓
 更新云端 last_checked_at 字段
   ↓
@@ -276,7 +276,7 @@ src/
   
   store/
     configStore.ts     # 系统配置 Store
-    deviceStore.ts     # 设备数据 Store
+    productStore.ts     # 设备数据 Store
     outboundStore.ts   # 出库篮 Store
     inventoryStore.ts  # 盘点状态 Store
     index.ts           # 统一导出
@@ -300,7 +300,7 @@ src/
 - 支持配置的增量更新
 
 ### 2. 高效扫码查找
-- 对 `device_id` 建立索引
+- 对 `product_id` 建立索引
 - 在内存中查找，性能优异
 - 支持离线查询
 
@@ -397,8 +397,8 @@ await db.system_config.put({ key: 'api_key', value: encryptedKey });
 // 导出配置和设备数据
 const exportData = async () => {
   const config = await db.system_config.toArray();
-  const devices = await db.devices.toArray();
-  return { config, devices };
+  const products = await db.products.toArray();
+  return { config, products };
 };
 ```
 
@@ -407,7 +407,7 @@ const exportData = async () => {
 // 从备份恢复数据
 const importData = async (data) => {
   await db.system_config.bulkPut(data.config);
-  await db.devices.bulkPut(data.devices);
+  await db.products.bulkPut(data.products);
 };
 ```
 
@@ -415,11 +415,11 @@ const importData = async (data) => {
 ```typescript
 // 统计设备状态分布
 const getStats = async () => {
-  const devices = await db.devices.toArray();
+  const products = await db.products.toArray();
   const stats = {
-    total: devices.length,
-    inStock: devices.filter(d => d.fields.status === '在库').length,
-    outStock: devices.filter(d => d.fields.status === '出库').length,
+    total: products.length,
+    inStock: products.filter(d => d.fields.status === '在库').length,
+    outStock: products.filter(d => d.fields.status === '出库').length,
   };
   return stats;
 };

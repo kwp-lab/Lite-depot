@@ -7,12 +7,12 @@
 ### IndexedDB 数据库
 
 - **数据库名称**: `inventory_client_db`
-- **表**: `devices` (设备列表), `system_config` (系统配置)
+- **表**: `products` (设备列表), `system_config` (系统配置)
 
 ### Store 模块
 
 - **configStore**: 系统配置管理
-- **deviceStore**: 设备数据管理
+- **productStore**: 设备数据管理
 - **outboundStore**: 出库篮管理
 - **inventoryStore**: 盘点状态管理
 
@@ -88,21 +88,21 @@ function App() {
 ### 从本地加载设备列表
 
 ```typescript
-import { useDeviceStore } from '@/store';
+import { useProductStore } from '@/store';
 
 function InboundPage() {
-  const { devices, loadDevicesFromDB } = useDeviceStore();
+  const { products, loadProductsFromDB } = useProductStore();
   
   useEffect(() => {
     // 从 IndexedDB 加载设备列表
-    loadDevicesFromDB();
-  }, [loadDevicesFromDB]);
+    loadProductsFromDB();
+  }, [loadProductsFromDB]);
   
   return (
     <div>
-      <h1>设备总数: {devices.length}</h1>
-      {devices.map(device => (
-        <div key={device.id}>{device.device_id}</div>
+      <h1>设备总数: {products.length}</h1>
+      {products.map(product => (
+        <div key={product.id}>{product.product_id}</div>
       ))}
     </div>
   );
@@ -112,10 +112,10 @@ function InboundPage() {
 ### 从云端同步设备
 
 ```typescript
-import { useDeviceStore, useConfigStore } from '@/store';
+import { useProductStore, useConfigStore } from '@/store';
 
 function SyncButton() {
-  const { syncFromRemote } = useDeviceStore();
+  const { syncFromRemote } = useProductStore();
   const { config } = useConfigStore();
   const [isSyncing, setIsSyncing] = useState(false);
   
@@ -142,19 +142,19 @@ function SyncButton() {
 ### 扫码查找设备
 
 ```typescript
-import { useDeviceStore } from '@/store';
+import { useProductStore } from '@/store';
 
 function ScanHandler() {
-  const { getDeviceByCode } = useDeviceStore();
+  const { getProductByCode } = useProductStore();
   const [buffer, setBuffer] = useState('');
   
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       if (e.key === 'Enter') {
         // 扫码完成
-        const device = getDeviceByCode(buffer);
-        if (device) {
-          console.log('找到设备:', device);
+        const product = getProductByCode(buffer);
+        if (product) {
+          console.log('找到设备:', product);
           // 显示设备详情
         } else {
           console.log('未找到设备');
@@ -168,7 +168,7 @@ function ScanHandler() {
     
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [buffer, getDeviceByCode]);
+  }, [buffer, getProductByCode]);
   
   return null;
 }
@@ -179,16 +179,16 @@ function ScanHandler() {
 ### 添加设备到出库篮
 
 ```typescript
-import { useOutboundStore, useDeviceStore } from '@/store';
+import { useOutboundStore, useProductStore } from '@/store';
 
 function OutboundPage() {
-  const { items, addDevice, removeDevice } = useOutboundStore();
-  const { getDeviceByCode } = useDeviceStore();
+  const { items, addProduct, removeProduct } = useOutboundStore();
+  const { getProductByCode } = useProductStore();
   
   const handleScan = (code: string) => {
-    const device = getDeviceByCode(code);
-    if (device) {
-      addDevice(device);
+    const product = getProductByCode(code);
+    if (product) {
+      addProduct(product);
     }
   };
   
@@ -196,9 +196,9 @@ function OutboundPage() {
     <div>
       <h1>出库篮 ({items.length})</h1>
       {items.map(item => (
-        <div key={item.device.id}>
-          {item.device.device_id}
-          <button onClick={() => removeDevice(item.device.id)}>
+        <div key={item.product.id}>
+          {item.product.product_id}
+          <button onClick={() => removeProduct(item.product.id)}>
             移除
           </button>
         </div>
@@ -318,7 +318,7 @@ const handleSave = async () => {
 await syncFromRemote();
 
 // 2. 断网后仍可查询设备
-const device = getDeviceByCode('DEVICE001'); // 从本地 IndexedDB 查询
+const product = getProductByCode('DEVICE001'); // 从本地 IndexedDB 查询
 ```
 
 ### 场景 4: 扫码入库
@@ -326,15 +326,15 @@ const device = getDeviceByCode('DEVICE001'); // 从本地 IndexedDB 查询
 ```typescript
 const handleScan = async (code: string) => {
   // 1. 查找设备
-  const device = getDeviceByCode(code);
+  const product = getProductByCode(code);
   
-  if (!device) {
+  if (!product) {
     alert('未找到设备');
     return;
   }
   
   // 2. 更新设备状态
-  await updateDevice(device.id, {
+  await updateProduct(product.id, {
     [config.status_field!]: '在库',
     [config.inbound_time_field!]: new Date().toISOString(),
   });
@@ -350,7 +350,7 @@ const handleScan = async (code: string) => {
 在 Chrome DevTools 中：
 1. 打开 Application 标签
 2. 左侧选择 IndexedDB → inventory_client_db
-3. 查看 devices 和 system_config 表
+3. 查看 products 和 system_config 表
 
 ### 清空数据
 
@@ -358,12 +358,12 @@ const handleScan = async (code: string) => {
 import { db } from '@/db';
 
 // 清空所有数据
-await db.devices.clear();
+await db.products.clear();
 await db.system_config.clear();
 
 // 或使用 Store 方法
 await clearConfig();
-await clearDevices();
+await clearProducts();
 ```
 
 ### 查看配置
@@ -376,8 +376,8 @@ const configs = await db.system_config.toArray();
 console.log(configs);
 
 // 查看设备数量
-const deviceCount = await db.devices.count();
-console.log('设备总数:', deviceCount);
+const productCount = await db.products.count();
+console.log('设备总数:', productCount);
 ```
 
 ## 8. 性能优化
@@ -397,12 +397,12 @@ const isConfigured = useConfigStore(state => state.isConfigured);
 
 ```typescript
 // ❌ 不好: 循环单次操作
-for (const device of devices) {
-  await db.devices.put(device);
+for (const product of products) {
+  await db.products.put(product);
 }
 
 // ✅ 好: 批量操作
-await db.devices.bulkPut(devices);
+await db.products.bulkPut(products);
 ```
 
 ## 9. 错误处理

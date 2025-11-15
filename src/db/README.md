@@ -10,20 +10,20 @@
 
 ## 数据库结构
 
-### 1. devices 表
+### 1. products 表
 
 从云端同步的设备列表（以远端为准）
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | id | string | 设备唯一 ID（记录 ID，主键） |
-| device_id | string | 设备编号（二维码内容，索引） |
+| product_id | string | 设备编号（二维码内容，索引） |
 | fields | object | AITable 返回的字段内容，动态结构 |
 | updated_at | number | 本地缓存更新时间戳（索引） |
 
 **索引**:
 - `id` (主键)
-- `device_id` (用于扫码快速查找)
+- `product_id` (用于扫码快速查找)
 - `updated_at` (用于同步时间追踪)
 
 **用途**:
@@ -81,10 +81,10 @@ await dbHelpers.setConfigs({
 const allConfig = await dbHelpers.getAllConfigs();
 
 // 根据设备编号查找设备（扫码场景）
-const device = await dbHelpers.findDeviceByCode('DEVICE001');
+const product = await dbHelpers.findProductByCode('DEVICE001');
 
 // 批量更新设备
-await dbHelpers.bulkUpdateDevices(devices);
+await dbHelpers.bulkUpdateProducts(products);
 ```
 
 ### 在 Store 中使用
@@ -136,15 +136,15 @@ await saveConfig({
 ```
 用户点击"同步设备列表"
   ↓
-调用 deviceStore.syncFromRemote()
+调用 productStore.syncFromRemote()
   ↓
 使用 ProviderFactory 获取云服务 Provider
   ↓
 调用 provider.getRecords() 获取远端数据
   ↓
-清空 devices 表（以远端为准）
+清空 products 表（以远端为准）
   ↓
-批量写入新数据到 devices 表
+批量写入新数据到 products 表
   ↓
 更新 lastSyncTime
   ↓
@@ -177,22 +177,22 @@ await saveConfig({ employee_id: 'EMP001' });
 
 ❌ 不推荐:
 ```typescript
-for (const device of devices) {
-  await db.devices.put(device);
+for (const product of products) {
+  await db.products.put(product);
 }
 ```
 
 ✅ 推荐:
 ```typescript
-await db.devices.bulkPut(devices);
+await db.products.bulkPut(products);
 ```
 
 ### 3. 使用事务处理关联操作
 
 ```typescript
-await db.transaction('rw', [db.devices, db.system_config], async () => {
-  await db.devices.clear();
-  await db.devices.bulkPut(newDevices);
+await db.transaction('rw', [db.products, db.system_config], async () => {
+  await db.products.clear();
+  await db.products.bulkPut(newProducts);
   await db.system_config.put({ key: 'lastSyncTime', value: Date.now() });
 });
 ```
@@ -201,7 +201,7 @@ await db.transaction('rw', [db.devices, db.system_config], async () => {
 
 ```typescript
 try {
-  await db.devices.bulkPut(devices);
+  await db.products.bulkPut(products);
 } catch (error) {
   console.error('Database operation failed:', error);
   // 记录错误到主进程日志
@@ -212,7 +212,7 @@ try {
 
 ## 性能优化建议
 
-1. **使用索引**: 已对 `device_id` 建立索引，扫码查找性能优异
+1. **使用索引**: 已对 `product_id` 建立索引，扫码查找性能优异
 2. **批量操作**: 使用 `bulkPut` 代替循环 `put`
 3. **避免频繁读取**: 使用 Store 缓存数据，减少数据库访问
 4. **定期清理**: 提供清除缓存功能，避免数据库膨胀

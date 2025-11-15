@@ -7,13 +7,13 @@ import { InboundPage } from './pages/InboundPage';
 import { OutboundPage } from './pages/OutboundPage';
 import { InventoryPage } from './pages/InventoryPage';
 import { SettingsPage } from './pages/SettingsPage';
-import { useConfigStore, useDeviceStore } from './store';
+import { useConfigStore, useProductStore } from './store';
 import { useOutboundStore } from './store/outboundStore';
 import { ProviderFactory, CloudProviderType } from './api';
 
 function App() {
   const { config, isConfigured, loadConfig } = useConfigStore();
-  const { loadDevicesFromDB, setCloudProvider } = useDeviceStore();
+  const { loadProductsFromDB, setCloudProvider } = useProductStore();
   const { setCloudProvider: setOutboundCloudProvider } = useOutboundStore();
 
   useEffect(() => {
@@ -33,9 +33,9 @@ function App() {
       });
       setCloudProvider(providerType);
       setOutboundCloudProvider(providerType);
-      loadDevicesFromDB();
+      loadProductsFromDB();
     }
-  }, [isConfigured, config, loadDevicesFromDB, setCloudProvider, setOutboundCloudProvider]);
+  }, [isConfigured, config, loadProductsFromDB, setCloudProvider, setOutboundCloudProvider]);
 
   return (
     <ThemeProvider defaultTheme="system" storageKey="lite-depot-theme">

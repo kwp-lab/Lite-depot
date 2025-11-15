@@ -1,43 +1,43 @@
 import { create } from 'zustand';
-import { Device } from '../types';
+import { Product } from '../types';
 import { db, dbHelpers } from '../db';
 import { ProviderFactory, CloudProviderType } from '../api';
 
-interface DeviceState {
-  devices: Device[];
+interface ProductState {
+  products: Product[];
   isLoading: boolean;
   lastSyncTime: number | null;
   cloudProvider: CloudProviderType;
   setCloudProvider: (provider: CloudProviderType) => void;
-  loadDevicesFromDB: () => Promise<void>;
+  loadProductsFromDB: () => Promise<void>;
   syncFromRemote: (viewId?: string) => Promise<void>;
-  getDeviceByCode: (code: string) => Device | undefined;
-  updateDevice: (id: string, fields: Record<string, string | number | boolean | null | undefined>) => Promise<void>;
-  clearDevices: () => Promise<void>;
+  getProductByCode: (code: string) => Product | undefined;
+  updateProduct: (id: string, fields: Record<string, string | number | boolean | null | undefined>) => Promise<void>;
+  clearProducts: () => Promise<void>;
 }
 
 /**
- * 设备列表存储 (DeviceStore)
+ * 设备列表存储 (ProductStore)
  * Based on Technical Specification Section 7.2
  * 
  * 状态：
- * - devices: 设备列表（从 IndexedDB 加载）
+ * - products: 设备列表（从 IndexedDB 加载）
  * - cloudProvider: 当前使用的云服务类型
  * - isLoading: 加载状态
  * - lastSyncTime: 上次同步时间
  * 
  * 提供方法：
- * - loadDevicesFromDB(): 从本地 IndexedDB 加载
+ * - loadProductsFromDB(): 从本地 IndexedDB 加载
  * - syncFromRemote(): 从云端同步（使用 ProviderFactory）
- * - getDeviceByCode(): 根据编号查找（用于扫码）
- * - updateDevice(): 更新设备（使用 ProviderFactory）
+ * - getProductByCode(): 根据编号查找（用于扫码）
+ * - updateProduct(): 更新设备（使用 ProviderFactory）
  * 
  * 同步规则：
  * ✅ 始终以远端为准（覆盖本地）
  * ✅ 使用 ProviderFactory 根据 cloudProvider 获取对应实例
  */
-export const useDeviceStore = create<DeviceState>((set, get) => ({
-  devices: [],
+export const useProductStore = create<ProductState>((set, get) => ({
+  products: [],
   isLoading: false,
   lastSyncTime: null,
   cloudProvider: 'aitable' as CloudProviderType,
@@ -53,22 +53,22 @@ export const useDeviceStore = create<DeviceState>((set, get) => ({
    * 从 IndexedDB 加载设备列表
    * 应用启动时调用，加载本地缓存的设备数据
    */
-  loadDevicesFromDB: async () => {
+  loadProductsFromDB: async () => {
     try {
       set({ isLoading: true });
-      const devices = await db.devices.toArray();
+      const products = await db.products.toArray();
       
       // 如果有缓存，加载上次同步时间
       let lastSyncTime: number | null = null;
-      if (devices.length > 0) {
+      if (products.length > 0) {
         // 从设备记录中获取最新的更新时间
-        const maxUpdatedAt = Math.max(...devices.map(d => d.updated_at));
+        const maxUpdatedAt = Math.max(...products.map(d => d.updated_at));
         lastSyncTime = maxUpdatedAt;
       }
       
-      set({ devices, lastSyncTime, isLoading: false });
+      set({ products, lastSyncTime, isLoading: false });
     } catch (error) {
-      console.error('Failed to load devices from DB:', error);
+      console.error('Failed to load products from DB:', error);
       set({ isLoading: false });
     }
   },
@@ -94,25 +94,25 @@ export const useDeviceStore = create<DeviceState>((set, get) => ({
       const records = await provider.getRecords(viewId);
       
       // 清空本地设备数据（以远端为准）
-      await db.devices.clear();
+      await db.products.clear();
       
       // 转换并保存记录到 IndexedDB
-      const devices: Device[] = records.map(record => {
+      const products: Product[] = records.map(record => {
         // 尝试从不同字段获取设备 ID（兼容不同命名）
-        const deviceId = record.fields.device_id || record.fields.Device_ID || record.id;
+        const productId = record.fields.product_id || record.fields.Product_ID || record.id;
         return {
           id: record.id,
-          device_id: String(deviceId),
+          product_id: String(productId),
           fields: record.fields,
           updated_at: Date.now(),
         };
       });
       
       // 批量保存到 IndexedDB
-      await db.devices.bulkPut(devices);
+      await db.products.bulkPut(products);
       
       set({ 
-        devices, 
+        products, 
         isLoading: false,
         lastSyncTime: Date.now(),
       });
@@ -132,9 +132,9 @@ export const useDeviceStore = create<DeviceState>((set, get) => ({
    * @param code - 设备编号（二维码内容）
    * @returns 找到的设备或 undefined
    */
-  getDeviceByCode: (code: string) => {
-    const devices = get().devices;
-    return devices.find(d => d.device_id === code);
+  getProductByCode: (code: string) => {
+    const products = get().products;
+    return products.find(d => d.product_id === code);
   },
 
   /**
@@ -144,32 +144,32 @@ export const useDeviceStore = create<DeviceState>((set, get) => ({
    * @param id - 设备记录 ID
    * @param fields - 要更新的字段
    */
-  updateDevice: async (id: string, fields: Record<string, string | number | boolean | null | undefined>) => {
+  updateProduct: async (id: string, fields: Record<string, string | number | boolean | null | undefined>) => {
     try {
       // 使用 Provider 更新云端数据
       const provider = ProviderFactory.getProvider(get().cloudProvider);
       await provider.updateRecord(id, fields);
       
       // 更新本地 IndexedDB
-      const device = get().devices.find(d => d.id === id);
-      if (device) {
-        const updatedDevice = {
-          ...device,
-          fields: { ...device.fields, ...fields },
+      const product = get().products.find(d => d.id === id);
+      if (product) {
+        const updatedProduct = {
+          ...product,
+          fields: { ...product.fields, ...fields },
           updated_at: Date.now(),
         };
         
-        await db.devices.put(updatedDevice);
+        await db.products.put(updatedProduct);
         
         // 更新内存中的设备列表
         set({
-          devices: get().devices.map(d => 
-            d.id === id ? updatedDevice : d
+          products: get().products.map(d => 
+            d.id === id ? updatedProduct : d
           ),
         });
       }
     } catch (error) {
-      console.error('Failed to update device:', error);
+      console.error('Failed to update product:', error);
       throw error;
     }
   },
@@ -178,12 +178,12 @@ export const useDeviceStore = create<DeviceState>((set, get) => ({
    * 清空所有设备数据
    * 用于清除本地缓存
    */
-  clearDevices: async () => {
+  clearProducts: async () => {
     try {
-      await db.devices.clear();
-      set({ devices: [], lastSyncTime: null });
+      await db.products.clear();
+      set({ products: [], lastSyncTime: null });
     } catch (error) {
-      console.error('Failed to clear devices:', error);
+      console.error('Failed to clear products:', error);
     }
   },
 }));

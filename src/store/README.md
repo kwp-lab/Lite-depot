@@ -51,34 +51,34 @@ function MyComponent() {
 
 ---
 
-### 2. deviceStore（设备数据）
+### 2. productStore（设备数据）
 
-**文件**: `deviceStore.ts`
+**文件**: `productStore.ts`
 
 **状态**:
-- `devices`: 设备列表
+- `products`: 设备列表
 - `isLoading`: 加载状态
 - `lastSyncTime`: 上次同步时间
 - `cloudProvider`: 云服务提供者类型
 
 **方法**:
-- `loadDevicesFromDB()`: 从本地 IndexedDB 加载
+- `loadProductsFromDB()`: 从本地 IndexedDB 加载
 - `syncFromRemote(viewId?)`: 从云端同步
-- `getDeviceByCode(code)`: 根据编号查找（扫码场景）
-- `updateDevice(id, fields)`: 更新设备
+- `getProductByCode(code)`: 根据编号查找（扫码场景）
+- `updateProduct(id, fields)`: 更新设备
 - `setCloudProvider(provider)`: 设置云服务类型
-- `clearDevices()`: 清空本地设备缓存
+- `clearProducts()`: 清空本地设备缓存
 
 **使用场景**:
 ```typescript
-import { useDeviceStore } from '@/store';
+import { useProductStore } from '@/store';
 
 function InboundPage() {
-  const { devices, getDeviceByCode, syncFromRemote } = useDeviceStore();
+  const { products, getProductByCode, syncFromRemote } = useProductStore();
   
   const handleScan = (code: string) => {
-    const device = getDeviceByCode(code);
-    if (device) {
+    const product = getProductByCode(code);
+    if (product) {
       // 找到设备，显示详情
     } else {
       // 未找到设备
@@ -109,8 +109,8 @@ function InboundPage() {
 - `cloudProvider`: 云服务提供者类型
 
 **方法**:
-- `addDevice(device)`: 添加设备到出库篮
-- `removeDevice(id)`: 移除设备
+- `addProduct(product)`: 添加设备到出库篮
+- `removeProduct(id)`: 移除设备
 - `setBorrowerName(name)`: 设置借用人姓名
 - `submit(...)`: 提交出库（批量更新）
 - `setCloudProvider(provider)`: 设置云服务类型
@@ -121,13 +121,13 @@ function InboundPage() {
 import { useOutboundStore } from '@/store';
 
 function OutboundPage() {
-  const { items, borrowerName, addDevice, setBorrowerName, submit } = useOutboundStore();
+  const { items, borrowerName, addProduct, setBorrowerName, submit } = useOutboundStore();
   const { config } = useConfigStore();
   
   const handleScan = (code: string) => {
-    const device = getDeviceByCode(code);
-    if (device && device.fields[config.status_field] === '在库') {
-      addDevice(device);
+    const product = getProductByCode(code);
+    if (product && product.fields[config.status_field] === '在库') {
+      addProduct(product);
     }
   };
   
@@ -154,12 +154,12 @@ function OutboundPage() {
 **文件**: `inventoryStore.ts`
 
 **状态**:
-- `scannedToday`: Map<device_id, timestamp> - 今日已扫描
+- `scannedToday`: Map<product_id, timestamp> - 今日已扫描
 - `isActive`: 是否正在盘点
 
 **方法**:
 - `startInventory()`: 开始盘点
-- `markScanned(deviceId)`: 标记设备已扫描
+- `markScanned(productId)`: 标记设备已扫描
 - `endInventory()`: 结束盘点，返回已扫描列表
 - `clear()`: 清空盘点记录
 
@@ -169,7 +169,7 @@ import { useInventoryStore } from '@/store';
 
 function InventoryPage() {
   const { isActive, scannedToday, startInventory, markScanned, endInventory } = useInventoryStore();
-  const { devices } = useDeviceStore();
+  const { products } = useProductStore();
   
   const handleStart = () => {
     startInventory();
@@ -183,7 +183,7 @@ function InventoryPage() {
   const handleEnd = () => {
     const scanned = endInventory();
     // 计算未盘点列表
-    const unscanned = devices.filter(d => !scannedToday.has(d.device_id));
+    const unscanned = products.filter(d => !scannedToday.has(d.product_id));
   };
 }
 ```
@@ -198,7 +198,7 @@ function InventoryPage() {
   ↓
 本地标记 scannedToday
   ↓
-结束 → 比较 devices - scannedToday → 未盘点列表
+结束 → 比较 products - scannedToday → 未盘点列表
 ```
 
 ---
@@ -208,12 +208,12 @@ function InventoryPage() {
 ### 1. 在组件中使用 Store
 
 ```typescript
-import { useConfigStore, useDeviceStore } from '@/store';
+import { useConfigStore, useProductStore } from '@/store';
 
 function MyComponent() {
   // ✅ 只订阅需要的状态
   const config = useConfigStore(state => state.config);
-  const devices = useDeviceStore(state => state.devices);
+  const products = useProductStore(state => state.products);
   
   // ❌ 避免订阅整个 store（会导致不必要的重渲染）
   const store = useConfigStore();
@@ -257,7 +257,7 @@ useEffect(() => {
       setOutboundCloudProvider(config.cloud_provider);
       
       // 4. 加载本地设备缓存
-      await loadDevicesFromDB();
+      await loadProductsFromDB();
     }
   };
   
@@ -322,7 +322,7 @@ useEffect(() => {
                │
                ▼
      ┌─────────────────────┐
-     │ loadDevicesFromDB() │ ← 加载本地设备缓存
+     │ loadProductsFromDB() │ ← 加载本地设备缓存
      └─────────┬───────────┘
                │
                ▼

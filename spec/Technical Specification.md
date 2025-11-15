@@ -28,7 +28,7 @@ Electron + React + shadcn-UI + Zustand + IndexedDB
 │ - UI：shadcn-UI + Tailwind │
 │ - 状态管理：Zustand │
 │ - 数据服务层：统一 API SDK │
-│ - IndexedDB：缓存 devices / system_config│
+│ - IndexedDB：缓存 products / system_config│
 │ - 扫码输入监听（Keyboard Input） │
 │ - 页面路由：入库 / 出库 / 盘点 / 设置 │
 └───────────────────────────────────────────┘
@@ -98,18 +98,18 @@ Electron + React + shadcn-UI + Zustand + IndexedDB
 
 ### 表结构：
 
-### ✅ 5.1.1 devices 表  
+### ✅ 5.1.1 products 表  
 从云端同步的设备列表（以远端为准）
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | id | string | 设备唯一 ID（记录 ID） |
-| device_id | string | 设备编号（二维码） |
+| product_id | string | 设备编号（二维码） |
 | fields | object | AITable 返回的字段内容，动态结构 |
 | updated_at | number | 本地缓存更新时间戳 |
 
 **索引：**  
-- `device_id`（用于扫码快速查找）
+- `product_id`（用于扫码快速查找）
 
 ---
 
@@ -184,7 +184,7 @@ await provider.getRecords(viewId)
 
 ### 在 Store 中使用：
 ```ts
-// deviceStore 和 outboundStore 都持有 cloudProvider 状态
+// productStore 和 outboundStore 都持有 cloudProvider 状态
 const provider = ProviderFactory.getProvider(cloudProvider)
 await provider.batchUpdate(records)
 ```
@@ -214,7 +214,7 @@ Store Modules
 ```
 store/
   configStore.ts      # 系统配置
-  deviceStore.ts      # 设备数据（包含 cloudProvider 状态）
+  productStore.ts      # 设备数据（包含 cloudProvider 状态）
   outboundStore.ts    # 出库篮（包含 cloudProvider 状态）
   inventoryStore.ts   # 盘点状态
   providerStore.ts    # Provider Hook（useProvider）
@@ -230,17 +230,17 @@ store/
 - 工号
 - 状态字段名（用户定义）
 
-## 7.2 deviceStore（设备列表）
+## 7.2 productStore（设备列表）
 
 状态：
-- `devices` - 设备列表
+- `products` - 设备列表
 - `cloudProvider` - 当前使用的云服务类型
 
 提供方法：
-- `loadDevicesFromDB()` - 从本地加载
+- `loadProductsFromDB()` - 从本地加载
 - `syncFromRemote(viewId?)` - 从云端同步（使用 ProviderFactory）
-- `getDeviceByCode(code)` - 根据编号查找
-- `updateDevice(id, fields)` - 更新设备（使用 ProviderFactory）
+- `getProductByCode(code)` - 根据编号查找
+- `updateProduct(id, fields)` - 更新设备（使用 ProviderFactory）
 - `setCloudProvider(provider)` - 设置云服务类型
 
 同步规则：
@@ -254,8 +254,8 @@ store/
 - `cloudProvider` - 当前使用的云服务类型
 
 方法：
-- `addDevice(device)` - 添加设备
-- `removeDevice(id)` - 移除设备
+- `addProduct(product)` - 添加设备
+- `removeProduct(id)` - 移除设备
 - `submit(employeeId, statusField, borrowerField, outboundTimeField)` - 提交出库
 - `setCloudProvider(provider)` - 设置云服务类型
 
@@ -265,11 +265,11 @@ store/
 
 属性：
 
-- scannedToday: {device_id: timestamp}
+- scannedToday: {product_id: timestamp}
 
 方法：
 
-- markScanned(device)
+- markScanned(product)
 - endInventory() → 返回未盘点列表
 
 # 8. 扫码逻辑设计（核心）
@@ -320,7 +320,7 @@ else {
 → 扫码 → 查找对应设备
 → 成功 → 更新 last_checked_at
 → 本地标记 scannedToday
-→ 结束 → 比较 devices - scannedToday → 未盘点列表
+→ 结束 → 比较 products - scannedToday → 未盘点列表
 ```
 
 # 10. 同步机制（手动）
@@ -329,7 +329,7 @@ else {
 ```
 用户点击“同步设备列表”
 → 调用 aiTable.getRecords()
-→ 覆盖 deviceStore + IndexedDB
+→ 覆盖 productStore + IndexedDB
 → 显示同步数量
 ```
 无自动同步。

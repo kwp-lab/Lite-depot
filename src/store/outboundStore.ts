@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Device, OutboundItem } from '../types';
+import { Product, OutboundItem } from '../types';
 import { ProviderFactory, CloudProviderType } from '../api';
 
 interface OutboundState {
@@ -8,8 +8,8 @@ interface OutboundState {
   isSubmitting: boolean;
   cloudProvider: CloudProviderType;
   setCloudProvider: (provider: CloudProviderType) => void;
-  addDevice: (device: Device) => void;
-  removeDevice: (deviceId: string) => void;
+  addProduct: (product: Product) => void;
+  removeProduct: (productId: string) => void;
   setBorrowerName: (name: string) => void;
   submit: (employeeId: string, statusField: string, borrowerField: string, outboundTimeField: string) => Promise<void>;
   clear: () => void;
@@ -26,8 +26,8 @@ interface OutboundState {
  * - isSubmitting: 提交状态
  * 
  * 方法：
- * - addDevice(): 添加设备到出库篮
- * - removeDevice(): 从出库篮移除设备
+ * - addProduct(): 添加设备到出库篮
+ * - removeProduct(): 从出库篮移除设备
  * - submit(): 提交出库（批量更新）
  * - clear(): 清空出库篮
  * 
@@ -52,29 +52,29 @@ export const useOutboundStore = create<OutboundState>((set, get) => ({
    * 添加设备到出库篮
    * 自动检查是否已存在，避免重复添加
    * 
-   * @param device - 要添加的设备
+   * @param product - 要添加的设备
    */
-  addDevice: (device: Device) => {
+  addProduct: (product: Product) => {
     const items = get().items;
     
     // 检查是否已在出库篮中
-    if (items.some(item => item.device.id === device.id)) {
+    if (items.some(item => item.product.id === product.id)) {
       return;
     }
     
     set({
-      items: [...items, { device, addedAt: Date.now() }],
+      items: [...items, { product, addedAt: Date.now() }],
     });
   },
 
   /**
    * 从出库篮移除设备
    * 
-   * @param deviceId - 设备 ID
+   * @param productId - 设备 ID
    */
-  removeDevice: (deviceId: string) => {
+  removeProduct: (productId: string) => {
     set({
-      items: get().items.filter(item => item.device.id !== deviceId),
+      items: get().items.filter(item => item.product.id !== productId),
     });
   },
 
@@ -115,7 +115,7 @@ export const useOutboundStore = create<OutboundState>((set, get) => ({
       
       // 构建批量更新记录
       const records = items.map(item => ({
-        id: item.device.id,
+        id: item.product.id,
         fields: {
           [statusField]: '出库',
           [borrowerField]: borrowerName,

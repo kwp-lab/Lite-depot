@@ -2,28 +2,28 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/Card';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
-import { useConfigStore, useDeviceStore, useInventoryStore } from '@/store';
+import { useConfigStore, useProductStore, useInventoryStore } from '@/store';
 import { formatDate } from '@/lib/utils';
 import { CheckCircle, AlertCircle, ClipboardCheck, FileText } from 'lucide-react';
 
 export const InventoryPage: React.FC = () => {
   const { config } = useConfigStore();
-  const { devices, getDeviceByCode, updateDevice, loadDevicesFromDB } = useDeviceStore();
+  const { products, getProductByCode, updateProduct, loadProductsFromDB } = useProductStore();
   const { scannedToday, isActive, startInventory, markScanned, endInventory, clear } = useInventoryStore();
   
   const [scanCode, setScanCode] = useState('');
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [scannedList, setScannedList] = useState<Array<{ deviceId: string; time: number }>>([]);
+  const [scannedList, setScannedList] = useState<Array<{ productId: string; time: number }>>([]);
   const [showUnscanned, setShowUnscanned] = useState(false);
-  const [unscannedDevices, setUnscannedDevices] = useState<string[]>([]);
+  const [unscannedProducts, setUnscannedProducts] = useState<string[]>([]);
   
   const inputRef = useRef<HTMLInputElement>(null);
   const scanBufferRef = useRef('');
   const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
-    loadDevicesFromDB();
-  }, [loadDevicesFromDB]);
+    loadProductsFromDB();
+  }, [loadProductsFromDB]);
 
   const handleStart = () => {
     startInventory();
@@ -38,15 +38,15 @@ export const InventoryPage: React.FC = () => {
 
     setScanCode(trimmedCode);
     
-    const device = getDeviceByCode(trimmedCode);
-    if (!device) {
+    const product = getProductByCode(trimmedCode);
+    if (!product) {
       setMessage({ type: 'error', text: '找不到该设备' });
       setTimeout(() => setMessage(null), 2000);
       return;
     }
 
     // Check if already scanned
-    if (scannedToday.has(device.device_id)) {
+    if (scannedToday.has(product.product_id)) {
       setMessage({ type: 'error', text: '该设备今日已盘点' });
       setTimeout(() => setMessage(null), 2000);
       return;
@@ -57,14 +57,14 @@ export const InventoryPage: React.FC = () => {
       const fields: Record<string, string | number | boolean | null | undefined> = {
         [config.checked_time_field || 'last_checked_at']: new Date().toISOString(),
       };
-      await updateDevice(device.id, fields);
+      await updateProduct(product.id, fields);
 
       // Mark as scanned locally
-      markScanned(device.device_id);
+      markScanned(product.product_id);
       
       // Add to scanned list
       setScannedList(prev => [{
-        deviceId: device.device_id,
+        productId: product.product_id,
         time: Date.now()
       }, ...prev].slice(0, 20));
 
@@ -76,7 +76,7 @@ export const InventoryPage: React.FC = () => {
       console.error('Inventory check failed:', error);
       setMessage({ type: 'error', text: '盘点失败：' + (error as Error).message });
     }
-  }, [getDeviceByCode, scannedToday, config.checked_time_field, updateDevice, markScanned]);
+  }, [getProductByCode, scannedToday, config.checked_time_field, updateProduct, markScanned]);
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -124,13 +124,13 @@ export const InventoryPage: React.FC = () => {
   const handleEnd = () => {
     const records = endInventory();
     
-    // Calculate unscanned devices
-    const scannedIds = new Set(records.map((r) => r.device_id));
-    const unscanned = devices
-      .filter((d) => !scannedIds.has(d.device_id))
-      .map((d) => d.device_id);
+    // Calculate unscanned products
+    const scannedIds = new Set(records.map((r) => r.product_id));
+    const unscanned = products
+      .filter((d) => !scannedIds.has(d.product_id))
+      .map((d) => d.product_id);
     
-    setUnscannedDevices(unscanned);
+    setUnscannedProducts(unscanned);
     setShowUnscanned(true);
   };
 
@@ -139,7 +139,7 @@ export const InventoryPage: React.FC = () => {
       clear();
       setScannedList([]);
       setShowUnscanned(false);
-      setUnscannedDevices([]);
+      setUnscannedProducts([]);
     }
   };
 
@@ -245,7 +245,7 @@ export const InventoryPage: React.FC = () => {
                     </div>
                     <div className="text-center p-4 bg-muted rounded-md">
                       <div className="text-3xl font-bold">
-                        {devices.length}
+                        {products.length}
                       </div>
                       <div className="text-sm text-muted-foreground mt-1">
                         总设备数
@@ -277,7 +277,7 @@ export const InventoryPage: React.FC = () => {
                           >
                             <div className="flex items-center space-x-3">
                               <CheckCircle className="w-4 h-4 text-green-600" />
-                              <span className="font-medium">{item.deviceId}</span>
+                              <span className="font-medium">{item.productId}</span>
                             </div>
                             <span className="text-sm text-muted-foreground">
                               {new Date(item.time).toLocaleTimeString('zh-CN')}
@@ -294,7 +294,7 @@ export const InventoryPage: React.FC = () => {
                     <div className="flex items-center justify-between">
                       <CardTitle className="flex items-center">
                         <FileText className="w-5 h-5 mr-2" />
-                        未盘点设备 ({unscannedDevices.length})
+                        未盘点设备 ({unscannedProducts.length})
                       </CardTitle>
                       <Button variant="ghost" size="sm" onClick={() => setShowUnscanned(false)}>
                         返回
@@ -302,19 +302,19 @@ export const InventoryPage: React.FC = () => {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    {unscannedDevices.length === 0 ? (
+                    {unscannedProducts.length === 0 ? (
                       <div className="text-center text-green-600 py-8">
                         <CheckCircle className="w-12 h-12 mx-auto mb-2" />
                         <p className="font-medium">所有设备已盘点完成！</p>
                       </div>
                     ) : (
                       <div className="space-y-2 max-h-[600px] overflow-auto">
-                        {unscannedDevices.map((deviceId, index) => (
+                        {unscannedProducts.map((productId, index) => (
                           <div
                             key={index}
                             className="p-3 bg-yellow-50 border border-yellow-200 rounded-md"
                           >
-                            <span className="font-medium text-yellow-800">{deviceId}</span>
+                            <span className="font-medium text-yellow-800">{productId}</span>
                           </div>
                         ))}
                       </div>

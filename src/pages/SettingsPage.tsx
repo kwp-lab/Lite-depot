@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useConfigStore, useDeviceStore } from '@/store';
+import { useConfigStore, useProductStore } from '@/store';
 import { useTheme } from '@/components/theme-provider';
 import { ProviderFactory } from '@/api';
 import { Loader2, Save, Trash2, RefreshCw, Monitor, Moon, Sun } from 'lucide-react';
@@ -18,7 +18,7 @@ import { Loader2, Save, Trash2, RefreshCw, Monitor, Moon, Sun } from 'lucide-rea
 export const SettingsPage: React.FC = () => {
   const navigate = useNavigate();
   const { config, saveConfig, clearConfig } = useConfigStore();
-  const { syncFromRemote, lastSyncTime, clearDevices } = useDeviceStore();
+  const { syncFromRemote, lastSyncTime, clearProducts } = useProductStore();
   const { theme, setTheme } = useTheme();
   
   const [formData, setFormData] = useState({
@@ -121,7 +121,7 @@ export const SettingsPage: React.FC = () => {
     
     try {
       setIsClearing(true);
-      await clearDevices();
+      await clearProducts();
       alert('缓存已清除');
     } catch (error) {
       console.error('Failed to clear cache:', error);

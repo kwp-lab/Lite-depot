@@ -39,10 +39,10 @@ export interface ProviderSchema {
   }>;
 }
 
-// Device related types
-export interface Device {
+// Product related types
+export interface Product {
   id: string;
-  device_id: string;
+  product_id: string;
   fields: Record<string, string | number | boolean | null | undefined>;
   updated_at: number;
 }
@@ -71,12 +71,12 @@ export interface AppConfig {
 
 // Outbound related types
 export interface OutboundItem {
-  device: Device;
+  product: Product;
   addedAt: number;
 }
 
 // Inventory related types
 export interface InventoryRecord {
-  device_id: string;
+  product_id: string;
   scanned_at: number;
 }
