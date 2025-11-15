@@ -50,8 +50,8 @@ function SetupPage() {
     await saveConfig({
       employee_id: formData.employee_id,
       api_key: formData.api_key,
-      base_id: formData.base_id,
-      table_id: formData.table_id,
+      workspace_id: formData.workspace_id,
+      datasheet_id: formData.datasheet_id,
       // ... 其他配置
     });
     

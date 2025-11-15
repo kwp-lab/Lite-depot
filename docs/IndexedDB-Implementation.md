@@ -55,7 +55,7 @@ await loadConfig();
 await saveConfig({
   employee_id: 'EMP001',
   api_key: 'xxx',
-  base_id: 'appxxx',
+  workspace_id: 'appxxx',
 });
 ```
 

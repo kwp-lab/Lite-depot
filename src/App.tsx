@@ -23,13 +23,13 @@ function App() {
 
   useEffect(() => {
     // Initialize Provider when config is loaded
-    if (isConfigured && config.api_key && config.base_id && config.table_id) {
+    if (isConfigured && config.api_key && config.workspace_id && config.datasheet_id) {
       const providerType = (config.cloud_provider || 'aitable') as CloudProviderType;
       const provider = ProviderFactory.getProvider(providerType);
       provider.initialize({
         apiKey: config.api_key,
-        baseId: config.base_id,
-        tableId: config.table_id,
+        baseId: config.workspace_id,
+        tableId: config.datasheet_id,
       });
       setCloudProvider(providerType);
       setOutboundCloudProvider(providerType);

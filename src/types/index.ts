@@ -57,8 +57,8 @@ export interface AppConfig {
   cloud_provider: string; // 云服务提供者，如 'aitable', 'notion' 等
   employee_id: string;
   api_key: string;
-  base_id: string;
-  table_id: string;
+  workspace_id: string;
+  datasheet_id: string;
   view_id: string;
   status_field: string;
   borrower_field: string;

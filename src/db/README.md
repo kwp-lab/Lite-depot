@@ -47,8 +47,8 @@
 - **云服务提供者** (`cloud_provider`): 'aitable' | 'notion' | ...
 - **工号** (`employee_id`): 用户工号
 - **API Key** (`api_key`): 云服务 API 密钥
-- **Base ID** (`base_id`): 数据库 ID
-- **Table ID** (`table_id`): 表 ID
+- **Workspace ID** (`workspace_id`): 数据库 ID
+- **Datasheet ID** (`datasheet_id`): 表 ID
 - **View ID** (`view_id`): 视图 ID（可选）
 - **状态字段名** (`status_field`): 用户定义的状态字段
 - **借用人字段名** (`borrower_field`): 借用人字段
@@ -74,7 +74,7 @@ const employeeId = await dbHelpers.getConfig('employee_id');
 await dbHelpers.setConfigs({
   cloud_provider: 'aitable',
   api_key: 'xxx',
-  base_id: 'appxxx',
+  workspace_id: 'appxxx',
 });
 
 // 获取所有配置

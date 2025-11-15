@@ -18,7 +18,7 @@ interface ConfigState {
  * 
  * 存储内容：
  * - 云服务提供者类型 (cloud_provider)
- * - 云服务相关配置 (API Key, Base ID, Table ID 等)
+ * - 云服务相关配置 (API Key, Workspace ID, Datasheet ID 等)
  * - 扫码设置
  * - 工号
  * - 状态字段名（用户定义）
@@ -55,8 +55,8 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
       // 检查是否已完成初始配置（必需字段都已填写）
       const isConfigured = !!(
         config.api_key &&
-        config.base_id &&
-        config.table_id &&
+        config.workspace_id &&
+        config.datasheet_id &&
         config.employee_id
       );
       
@@ -87,8 +87,8 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
       // 检查是否已完成初始配置
       const isConfigured = !!(
         config.api_key &&
-        config.base_id &&
-        config.table_id &&
+        config.workspace_id &&
+        config.datasheet_id &&
         config.employee_id
       );
       

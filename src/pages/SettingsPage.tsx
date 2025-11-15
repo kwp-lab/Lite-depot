@@ -25,8 +25,8 @@ export const SettingsPage: React.FC = () => {
     cloud_provider: 'aitable',
     employee_id: '',
     api_key: '',
-    base_id: '',
-    table_id: '',
+    workspace_id: '',
+    datasheet_id: '',
     view_id: '',
     status_field: 'status',
     borrower_field: 'borrower',
@@ -65,7 +65,7 @@ export const SettingsPage: React.FC = () => {
       setIsSaving(true);
       
       // Validate required fields
-      if (!formData.employee_id || !formData.api_key || !formData.base_id || !formData.table_id) {
+      if (!formData.employee_id || !formData.api_key || !formData.workspace_id || !formData.datasheet_id) {
         alert('请填写所有必填字段');
         return;
       }
@@ -76,8 +76,8 @@ export const SettingsPage: React.FC = () => {
       const provider = ProviderFactory.getProvider(formData.cloud_provider as any);
       provider.initialize({
         apiKey: formData.api_key,
-        baseId: formData.base_id,
-        tableId: formData.table_id,
+        baseId: formData.workspace_id,
+        tableId: formData.datasheet_id,
       });
       
       alert('配置保存成功！');
@@ -193,20 +193,20 @@ export const SettingsPage: React.FC = () => {
           
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Base ID *</label>
+              <label className="block text-sm font-medium mb-2">Workspace ID *</label>
               <Input
-                name="base_id"
-                value={formData.base_id}
+                name="workspace_id"
+                value={formData.workspace_id}
                 onChange={handleChange}
                 placeholder="app..."
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium mb-2">Table ID *</label>
+              <label className="block text-sm font-medium mb-2">Datasheet ID *</label>
               <Input
-                name="table_id"
-                value={formData.table_id}
+                name="datasheet_id"
+                value={formData.datasheet_id}
                 onChange={handleChange}
                 placeholder="tbl..."
               />

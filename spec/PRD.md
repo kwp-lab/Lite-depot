@@ -111,7 +111,7 @@
 - **云服务提供者选择**（AITable / Notion / ...）  
 - 仓库管理员工号  
 - 云服务 API Key  
-- Base ID / Table ID  
+- Workspace ID / Datasheet ID  
 - 货物视图 ID  
 - 是否开启全屏模式  
 - 是否启用离线缓存  
@@ -198,7 +198,7 @@
 Sidebar 底部固定一个用户卡片区域，显示：
 
 - 管理员工号  
-- 当前绑定的 AITable 信息（如 Base ID 简短展示）
+- 当前绑定的 AITable 信息（如 Workspace ID 简短展示）
 - 【退出登录】按钮
 
 #### 用户卡片 UI 示例（结构）
@@ -271,7 +271,7 @@ Sidebar 底部固定一个用户卡片区域，显示：
   - 每个选项显示名称和描述
 - 工号输入
 - 云服务 API Key
-- Base ID / Table ID / View ID
+- Workspace ID / Datasheet ID / View ID
 
 ### 字段映射
 - 状态字段名

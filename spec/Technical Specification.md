@@ -124,7 +124,7 @@ Electron + React + shadcn-UI + Zustand + IndexedDB
 - **云服务提供者**（cloud_provider）：'aitable' | 'notion' | ...
 - 工号（employee_id）
 - API Key（base64）
-- Base ID / Table ID / View ID
+- Workspace ID / Datasheet ID / View ID
 - 状态字段名（user-defined）
 - 扫码配置（是否以 Enter 结束）
 - UI 配置（全屏模式）
@@ -225,7 +225,7 @@ store/
 存储：
 
 - **云服务提供者类型**（cloud_provider）
-- 云服务相关配置（API Key, Base ID, Table ID 等）
+- 云服务相关配置（API Key, Workspace ID, Datasheet ID 等）
 - 扫码设置
 - 工号
 - 状态字段名（用户定义）
