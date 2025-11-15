@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { ThemeProvider } from './components/theme-provider';
 import { Layout } from './components/Layout';
 import { SetupPage } from './pages/SetupPage';
 import { InboundPage } from './pages/InboundPage';
@@ -37,27 +38,29 @@ function App() {
   }, [isConfigured, config, loadDevicesFromDB, setCloudProvider, setOutboundCloudProvider]);
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/setup" element={<SetupPage />} />
-        
-        {isConfigured ? (
-          <Route element={<Layout />}>
-            <Route path="/inbound" element={<InboundPage />} />
-            <Route path="/outbound" element={<OutboundPage />} />
-            <Route path="/inventory" element={<InventoryPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/" element={<Navigate to="/inbound" replace />} />
-            <Route path="*" element={<Navigate to="/inbound" replace />} />
-          </Route>
-        ) : (
-          <>
-            <Route path="/" element={<Navigate to="/setup" replace />} />
-            <Route path="*" element={<Navigate to="/setup" replace />} />
-          </>
-        )}
-      </Routes>
-    </BrowserRouter>
+    <ThemeProvider defaultTheme="system" storageKey="lite-depot-theme">
+      <BrowserRouter>
+        <Routes>
+          <Route path="/setup" element={<SetupPage />} />
+          
+          {isConfigured ? (
+            <Route element={<Layout />}>
+              <Route path="/inbound" element={<InboundPage />} />
+              <Route path="/outbound" element={<OutboundPage />} />
+              <Route path="/inventory" element={<InventoryPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/" element={<Navigate to="/inbound" replace />} />
+              <Route path="*" element={<Navigate to="/inbound" replace />} />
+            </Route>
+          ) : (
+            <>
+              <Route path="/" element={<Navigate to="/setup" replace />} />
+              <Route path="*" element={<Navigate to="/setup" replace />} />
+            </>
+          )}
+        </Routes>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }
 

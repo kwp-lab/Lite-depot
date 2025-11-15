@@ -11,13 +11,15 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useConfigStore, useDeviceStore } from '@/store';
+import { useTheme } from '@/components/theme-provider';
 import { ProviderFactory } from '@/api';
-import { Loader2, Save, Trash2, RefreshCw } from 'lucide-react';
+import { Loader2, Save, Trash2, RefreshCw, Monitor, Moon, Sun } from 'lucide-react';
 
 export const SettingsPage: React.FC = () => {
   const navigate = useNavigate();
   const { config, saveConfig, clearConfig } = useConfigStore();
   const { syncFromRemote, lastSyncTime, clearDevices } = useDeviceStore();
+  const { theme, setTheme } = useTheme();
   
   const [formData, setFormData] = useState({
     cloud_provider: 'aitable',
@@ -279,6 +281,59 @@ export const SettingsPage: React.FC = () => {
                 onChange={handleChange}
                 placeholder="last_checked_at"
               />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      {/* Theme Configuration */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>主题设置</CardTitle>
+          <CardDescription>选择应用程序的主题外观</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div>
+            <label className="block text-sm font-medium mb-2">主题模式</label>
+            <div className="grid grid-cols-3 gap-4">
+              <button
+                type="button"
+                onClick={() => setTheme('light')}
+                className={`flex flex-col items-center gap-2 p-4 border-2 rounded-lg transition-colors ${
+                  theme === 'light'
+                    ? 'border-primary bg-primary/10'
+                    : 'border-border hover:border-primary/50'
+                }`}
+              >
+                <Sun className="h-6 w-6" />
+                <span className="text-sm font-medium">浅色模式</span>
+              </button>
+              
+              <button
+                type="button"
+                onClick={() => setTheme('dark')}
+                className={`flex flex-col items-center gap-2 p-4 border-2 rounded-lg transition-colors ${
+                  theme === 'dark'
+                    ? 'border-primary bg-primary/10'
+                    : 'border-border hover:border-primary/50'
+                }`}
+              >
+                <Moon className="h-6 w-6" />
+                <span className="text-sm font-medium">深色模式</span>
+              </button>
+              
+              <button
+                type="button"
+                onClick={() => setTheme('system')}
+                className={`flex flex-col items-center gap-2 p-4 border-2 rounded-lg transition-colors ${
+                  theme === 'system'
+                    ? 'border-primary bg-primary/10'
+                    : 'border-border hover:border-primary/50'
+                }`}
+              >
+                <Monitor className="h-6 w-6" />
+                <span className="text-sm font-medium">跟随系统</span>
+              </button>
             </div>
           </div>
         </CardContent>
