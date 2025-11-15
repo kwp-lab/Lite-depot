@@ -121,6 +121,7 @@ Electron + React + shadcn-UI + Zustand + IndexedDB
 | value | any | 配置值 |
 
 存储内容包括：
+- **云服务提供者**（cloud_provider）：'aitable' | 'notion' | ...
 - 工号（employee_id）
 - API Key（base64）
 - Base ID / Table ID / View ID
@@ -130,85 +131,135 @@ Electron + React + shadcn-UI + Zustand + IndexedDB
 
 ---
 
-# 6. AITable API 服务层设计（可替换为 Notion）
+# 6. 云服务 Provider 架构设计（可扩展多个服务）
 
-## 6.1 API 结构
-采用统一 SDK 风格：
+## 6.1 架构说明
+
+采用 **Service Provider 设计模式**，通过抽象基类和工厂模式实现多云服务支持：
 
 ```
 api/
-index.ts
-aitables.ts // 当前后端服务
-types.ts
-http.ts
+  index.ts              # 统一导出
+  base-provider.ts      # 抽象基类
+  provider-factory.ts   # Provider 工厂
+  aitables.ts          # AITable 实现
+  http.ts              # HTTP 客户端
 ```
 
-## 6.2 导出 API 方法
+### 核心类：
 
-### ✅ Schema 读取  
+#### BaseProvider（抽象基类）
+定义统一的数据操作接口：
+- `initialize(config)` - 初始化服务
+- `isInitialized()` - 检查初始化状态
+- `getSchema()` - 获取 Schema
+- `getRecords(viewId?)` - 获取记录列表
+- `createRecord(fields)` - 创建单条记录
+- `batchCreate(records)` - 批量创建
+- `updateRecord(id, fields)` - 更新单条记录
+- `batchUpdate(records)` - 批量更新（最多 10 条/次）
+- `deleteRecord(id)` - 删除单条记录
+- `batchDelete(ids)` - 批量删除
+- `updateCredentials(credentials)` - 更新认证信息
+
+#### ProviderFactory（工厂类）
+根据配置返回对应的 Provider 实例：
 ```ts
-aiTable.getSchema(baseId, tableId)
+const provider = ProviderFactory.getProvider('aitable')
+provider.initialize({ apiKey, baseId, tableId })
 ```
 
-### 拉取设备列表（手动同步）
+#### AITableProvider（AITable 实现）
+继承 BaseProvider，实现所有抽象方法。
+
+## 6.2 使用方式
+
+### 在组件中使用：
 ```ts
-aiTable.getRecords({ baseId, tableId, viewId })
+import { ProviderFactory } from '@/api'
+
+const provider = ProviderFactory.getProvider(config.cloud_provider)
+await provider.getRecords(viewId)
 ```
 
-### 单条更新
-
+### 在 Store 中使用：
 ```ts
-aiTable.updateRecord(id, fields)
+// deviceStore 和 outboundStore 都持有 cloudProvider 状态
+const provider = ProviderFactory.getProvider(cloudProvider)
+await provider.batchUpdate(records)
 ```
 
-### 批量更新（最多 10 条/次）
-```
-aiTable.batchUpdate(records: Array<{id, fields}>)
-```
+## 6.3 扩展新的服务提供者
 
-所有 API 统一走 http.ts，方便未来切换成 Notion、Airtable 等。
+只需 3 步：
+
+1. 创建新的 Provider 类继承 BaseProvider
+2. 实现所有抽象方法
+3. 在 ProviderFactory 中注册
+
+示例：
+```ts
+export class NotionProvider extends BaseProvider<NotionRecord, NotionSchema> {
+  // 实现所有方法
+}
+
+// 在 ProviderFactory 中添加
+case 'notion':
+  provider = new NotionProvider()
+  break
+```
 
 # 7. 状态管理（Zustand）
 Store Modules
 ```
 store/
   configStore.ts      # 系统配置
-  deviceStore.ts      # 设备数据
-  outboundStore.ts    # 出库篮
+  deviceStore.ts      # 设备数据（包含 cloudProvider 状态）
+  outboundStore.ts    # 出库篮（包含 cloudProvider 状态）
   inventoryStore.ts   # 盘点状态
+  providerStore.ts    # Provider Hook（useProvider）
 ```
 
 ## 7.1 configStore（系统配置）
 
 存储：
 
-- AITable 相关配置
+- **云服务提供者类型**（cloud_provider）
+- 云服务相关配置（API Key, Base ID, Table ID 等）
 - 扫码设置
 - 工号
 - 状态字段名（用户定义）
 
 ## 7.2 deviceStore（设备列表）
 
+状态：
+- `devices` - 设备列表
+- `cloudProvider` - 当前使用的云服务类型
+
 提供方法：
-
-loadDevicesFromDB()
-
-syncFromRemote()
-
-getDeviceByScanCode()
+- `loadDevicesFromDB()` - 从本地加载
+- `syncFromRemote(viewId?)` - 从云端同步（使用 ProviderFactory）
+- `getDeviceByCode(code)` - 根据编号查找
+- `updateDevice(id, fields)` - 更新设备（使用 ProviderFactory）
+- `setCloudProvider(provider)` - 设置云服务类型
 
 同步规则：
 ✅ 始终以远端为准（覆盖本地）
+✅ 使用 ProviderFactory 根据 cloudProvider 获取对应实例
 
 ## 7.3 outboundStore（批量出库篮）
 
+状态：
+- `items` - 出库设备列表
+- `cloudProvider` - 当前使用的云服务类型
+
 方法：
+- `addDevice(device)` - 添加设备
+- `removeDevice(id)` - 移除设备
+- `submit(employeeId, statusField, borrowerField, outboundTimeField)` - 提交出库
+- `setCloudProvider(provider)` - 设置云服务类型
 
-- addDevice(device)
-- removeDevice(id)
-- submit(borrowerName)
-
-一次提交调用 batchUpdate，如 >10 条则拆分为多批。
+一次提交调用 Provider 的 batchUpdate，如 >10 条则自动拆分为多批。
 
 ## 7.4 inventoryStore（盘点）
 

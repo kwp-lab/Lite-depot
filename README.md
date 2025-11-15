@@ -22,7 +22,7 @@ A desktop application for managing device inventory with barcode scanning suppor
 - **State Management**: Zustand
 - **Local Database**: IndexedDB (via Dexie.js)
 - **Build Tool**: Vite
-- **API Integration**: AITable (Airtable-compatible)
+- **API Integration**: AITable
 
 ## Getting Started
 
