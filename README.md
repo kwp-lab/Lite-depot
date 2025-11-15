@@ -2,14 +2,14 @@
 
 **Lightweight Inventory Management System**
 
-A desktop application for managing device inventory with barcode scanning support. Built with Electron, React, and TypeScript.
+A desktop application for managing product inventory with barcode scanning support. Built with Electron, React, and TypeScript.
 
 ## Features
 
-- 📦 **Device Inbound**: Quick device check-in with barcode scanning
-- 📤 **Batch Outbound**: Scan multiple devices for batch checkout with borrower tracking
-- 📋 **Inventory Check**: Complete inventory auditing with unscanned device reporting
-- ⚙️ **Settings**: Easy configuration and device synchronization
+- 📦 **Product Inbound**: Quick product check-in with barcode scanning
+- 📤 **Batch Outbound**: Scan multiple products for batch checkout with borrower tracking
+- 📋 **Inventory Check**: Complete inventory auditing with unscanned product reporting
+- ⚙️ **Settings**: Easy configuration and product synchronization
 - 🔄 **AITable Integration**: Seamless integration with AITable API
 - 💾 **Offline Support**: Local IndexedDB caching for fast lookups
 - 🖥️ **Cross-platform**: Windows (primary), macOS, and Linux support
@@ -65,4 +65,4 @@ src/
 ```
 
 
-**LiteDepot** - 让设备管理更简单 (Making device management easier)
+**LiteDepot** - 让设备管理更简单 (Making product management easier)

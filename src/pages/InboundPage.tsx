@@ -2,17 +2,17 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/Card';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
-import { useConfigStore, useDeviceStore } from '@/store';
-import { Device } from '@/types';
+import { useConfigStore, useProductStore } from '@/store';
+import { Product } from '@/types';
 import { formatDate } from '@/lib/utils';
-import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { Loader2, CheckCircle, AlertCircle, Search } from 'lucide-react';
 
 export const InboundPage: React.FC = () => {
   const { config } = useConfigStore();
-  const { getDeviceByCode, updateDevice, loadDevicesFromDB } = useDeviceStore();
+  const { getProductByCode, updateProduct, loadProductsFromDB } = useProductStore();
   
   const [scanCode, setScanCode] = useState('');
-  const [currentDevice, setCurrentDevice] = useState<Device | null>(null);
+  const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   
@@ -21,8 +21,8 @@ export const InboundPage: React.FC = () => {
   const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
-    loadDevicesFromDB();
-  }, [loadDevicesFromDB]);
+    loadProductsFromDB();
+  }, [loadProductsFromDB]);
 
   const handleScan = useCallback((code: string) => {
     const trimmedCode = code.trim();
@@ -30,15 +30,15 @@ export const InboundPage: React.FC = () => {
 
     setScanCode(trimmedCode);
     
-    const device = getDeviceByCode(trimmedCode);
-    if (device) {
-      setCurrentDevice(device);
+    const product = getProductByCode(trimmedCode);
+    if (product) {
+      setCurrentProduct(product);
       setMessage(null);
     } else {
-      setCurrentDevice(null);
+      setCurrentProduct(null);
       setMessage({ type: 'error', text: '找不到该设备' });
     }
-  }, [getDeviceByCode]);
+  }, [getProductByCode]);
 
   useEffect(() => {
     // Focus input on mount
@@ -84,7 +84,7 @@ export const InboundPage: React.FC = () => {
   };
 
   const handleInbound = async () => {
-    if (!currentDevice) return;
+    if (!currentProduct) return;
     
     try {
       setIsProcessing(true);
@@ -95,10 +95,10 @@ export const InboundPage: React.FC = () => {
         operator: config.employee_id,
       };
       
-      await updateDevice(currentDevice.id, fields);
+      await updateProduct(currentProduct.id, fields);
       
       setMessage({ type: 'success', text: '入库成功！' });
-      setCurrentDevice(null);
+      setCurrentProduct(null);
       setScanCode('');
       
       // Auto-clear success message
@@ -141,16 +141,19 @@ export const InboundPage: React.FC = () => {
               <CardTitle>扫码区</CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleManualScan} className="flex space-x-2">
+              <form onSubmit={handleManualScan} className="grid grid-cols-12 gap-2">
                 <Input
                   ref={inputRef}
                   value={scanCode}
                   onChange={(e) => setScanCode(e.target.value)}
                   placeholder="扫描设备条码或手动输入..."
-                  className="text-lg"
+                  className="text-lg col-span-10"
                   autoFocus
                 />
-                <Button type="submit">查询</Button>
+                <Button type="submit" className="col-span-2">
+                  <Search className="w-4 h-4 mr-1" />
+                  查询
+                </Button>
               </form>
             </CardContent>
           </Card>
@@ -173,15 +176,15 @@ export const InboundPage: React.FC = () => {
             </div>
           )}
 
-          {/* Device Details */}
-          {currentDevice && (
+          {/* Product Details */}
+          {currentProduct && (
             <Card>
               <CardHeader>
                 <CardTitle>设备信息</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                  {Object.entries(currentDevice.fields).map(([key, value]: [string, unknown]) => (
+                  {Object.entries(currentProduct.fields).map(([key, value]: [string, unknown]) => (
                     <div key={key}>
                       <label className="text-sm text-muted-foreground">{key}</label>
                       <p className="font-medium">
@@ -213,7 +216,7 @@ export const InboundPage: React.FC = () => {
           )}
 
           {/* Instructions */}
-          {!currentDevice && !message && (
+          {!currentProduct && !message && (
             <Card className="bg-muted">
               <CardContent className="p-6 text-center text-muted-foreground">
                 <p>请使用扫码枪扫描设备条码，或手动输入设备编号后点击查询</p>
