@@ -5,7 +5,7 @@ import { Button } from '@/components/Button';
 import { useConfigStore, useDeviceStore } from '@/store';
 import { Device } from '@/types';
 import { formatDate } from '@/lib/utils';
-import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { Loader2, CheckCircle, AlertCircle, Search } from 'lucide-react';
 
 export const InboundPage: React.FC = () => {
   const { config } = useConfigStore();
@@ -141,16 +141,19 @@ export const InboundPage: React.FC = () => {
               <CardTitle>扫码区</CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleManualScan} className="flex space-x-2">
+              <form onSubmit={handleManualScan} className="grid grid-cols-12 gap-2">
                 <Input
                   ref={inputRef}
                   value={scanCode}
                   onChange={(e) => setScanCode(e.target.value)}
                   placeholder="扫描设备条码或手动输入..."
-                  className="text-lg"
+                  className="text-lg col-span-10"
                   autoFocus
                 />
-                <Button type="submit">查询</Button>
+                <Button type="submit" className="col-span-2">
+                  <Search className="w-4 h-4 mr-1" />
+                  查询
+                </Button>
               </form>
             </CardContent>
           </Card>
