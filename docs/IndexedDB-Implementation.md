@@ -14,7 +14,7 @@
 #### products 表
 - 字段: `id`, `product_id`, `fields`, `updated_at`
 - 索引: `id` (主键), `product_id` (扫码查找), `updated_at` (同步追踪)
-- 用途: 缓存从云端同步的货物列表
+- 用途: 缓存从云端同步的货品列表
 
 #### system_config 表
 - 字段: `key`, `value`
@@ -26,8 +26,8 @@
 - `getConfig()`: 获取单个配置项
 - `setConfigs()`: 批量保存配置
 - `getAllConfigs()`: 获取所有配置
-- `findProductByCode()`: 根据货物编号查找（扫码场景）
-- `bulkUpdateProducts()`: 批量更新货物
+- `findProductByCode()`: 根据货品编号查找（扫码场景）
+- `bulkUpdateProducts()`: 批量更新货品
 - `clearAll()`: 清空所有数据
 
 ### ✅ 2. 配置存储（src/store/configStore.ts）
@@ -59,14 +59,14 @@ await saveConfig({
 });
 ```
 
-### ✅ 3. 货物数据存储（src/store/productStore.ts）
+### ✅ 3. 货品数据存储（src/store/productStore.ts）
 
 **功能**:
-- 从 IndexedDB 加载货物列表
-- 从云端同步货物数据（以远端为准）
-- 根据货物编号快速查找（扫码场景）
-- 更新货物信息（同时更新云端和本地）
-- 清空本地货物缓存
+- 从 IndexedDB 加载货品列表
+- 从云端同步货品数据（以远端为准）
+- 根据货品编号快速查找（扫码场景）
+- 更新货品信息（同时更新云端和本地）
+- 清空本地货品缓存
 
 **同步规则**:
 - ✅ 始终以远端为准（覆盖本地）
@@ -83,14 +83,14 @@ await loadProductsFromDB();
 // 从云端同步
 await syncFromRemote(viewId);
 
-// 扫码查找货物
+// 扫码查找货品
 const product = getProductByCode('DEVICE001');
 ```
 
 ### ✅ 4. 出库篮存储（src/store/outboundStore.ts）
 
 **功能**:
-- 添加/移除货物到出库篮
+- 添加/移除货品到出库篮
 - 设置借用人姓名
 - 批量提交出库（调用 Provider 的 batchUpdate）
 - 清空出库篮
@@ -98,13 +98,13 @@ const product = getProductByCode('DEVICE001');
 **业务逻辑**:
 - 出库篮数据仅存储在内存中（不持久化）
 - 提交成功后自动清空
-- 支持 >10 条货物的自动拆分批次
+- 支持 >10 条货品的自动拆分批次
 
 **使用示例**:
 ```typescript
 const { items, addProduct, submit } = useOutboundStore();
 
-// 添加货物
+// 添加货品
 addProduct(product);
 
 // 提交出库
@@ -115,14 +115,14 @@ await submit(employeeId, statusField, borrowerField, outboundTimeField);
 
 **功能**:
 - 开始盘点会话
-- 标记货物已扫描
+- 标记货品已扫描
 - 结束盘点并返回已扫描列表
 - 清空盘点记录
 
 **业务逻辑**:
 - 盘点数据仅存储在内存中（不持久化）
 - 使用 Map 记录 {product_id: timestamp}
-- 结束盘点时返回已扫描货物列表
+- 结束盘点时返回已扫描货品列表
 
 **使用示例**:
 ```typescript
@@ -173,7 +173,7 @@ App.tsx useEffect 调用 configStore.loadConfig()
   ↓
 初始化 Provider
   ↓
-加载本地货物缓存
+加载本地货品缓存
   ↓
 直接显示主界面
 ```
@@ -196,10 +196,10 @@ configStore.saveConfig() → 更新 IndexedDB
 
 ## 数据同步流程
 
-### 手动同步货物列表
+### 手动同步货品列表
 
 ```
-用户点击"同步货物列表"
+用户点击"同步货品列表"
   ↓
 productStore.syncFromRemote(viewId)
   ↓
@@ -225,7 +225,7 @@ productStore.syncFromRemote(viewId)
 ### 入库场景
 
 ```
-扫码枪输入货物编号
+扫码枪输入货品编号
   ↓
 触发 Enter 键（结束输入）
   ↓
@@ -233,33 +233,33 @@ productStore.getProductByCode(code)
   ↓
 在内存中的 products 数组查找
   ↓
-找到货物 → 显示详情 → 点击入库
+找到货品 → 显示详情 → 点击入库
   ↓
-更新货物状态（云端 + 本地）
+更新货品状态（云端 + 本地）
 ```
 
 ### 出库场景
 
 ```
-扫码枪输入货物编号
+扫码枪输入货品编号
   ↓
 productStore.getProductByCode(code)
   ↓
-检查货物状态 = '在库'?
+检查货品状态 = '在库'?
   ↓
 是 → outboundStore.addProduct(product)
   ↓
-否 → 提示"货物已出库"
+否 → 提示"货品已出库"
 ```
 
 ### 盘点场景
 
 ```
-扫码枪输入货物编号
+扫码枪输入货品编号
   ↓
 productStore.getProductByCode(code)
   ↓
-找到货物 → inventoryStore.markScanned(productId)
+找到货品 → inventoryStore.markScanned(productId)
   ↓
 更新云端 last_checked_at 字段
   ↓
@@ -276,7 +276,7 @@ src/
   
   store/
     configStore.ts     # 系统配置 Store
-    productStore.ts     # 货物数据 Store
+    productStore.ts     # 货品数据 Store
     outboundStore.ts   # 出库篮 Store
     inventoryStore.ts  # 盘点状态 Store
     index.ts           # 统一导出
@@ -339,28 +339,28 @@ src/
 ✅ 验证: 修改后的配置已生效
 ```
 
-### 3. 货物同步测试
+### 3. 货品同步测试
 ```
-1. 点击"同步货物列表"
+1. 点击"同步货品列表"
 2. 等待同步完成
 3. 关闭应用
 4. 重新打开应用
-✅ 验证: 货物列表从本地缓存加载，无需重新同步
+✅ 验证: 货品列表从本地缓存加载，无需重新同步
 ```
 
 ### 4. 扫码查找测试
 ```
-1. 同步货物列表
-2. 使用扫码枪扫描货物二维码
-✅ 验证: 快速找到货物并显示详情
+1. 同步货品列表
+2. 使用扫码枪扫描货品二维码
+✅ 验证: 快速找到货品并显示详情
 ```
 
 ### 5. 离线能力测试
 ```
-1. 同步货物列表
+1. 同步货品列表
 2. 断开网络
-3. 扫描货物二维码
-✅ 验证: 仍然可以查询货物信息（从本地 IndexedDB）
+3. 扫描货品二维码
+✅ 验证: 仍然可以查询货品信息（从本地 IndexedDB）
 ```
 
 ## 性能指标
@@ -368,7 +368,7 @@ src/
 根据 Dexie.js 官方文档和实际测试：
 
 - **配置加载**: < 10ms
-- **货物列表加载**: < 50ms (1000 条记录)
+- **货品列表加载**: < 50ms (1000 条记录)
 - **扫码查找**: < 5ms (有索引)
 - **批量写入**: ~100 条/秒
 
@@ -379,7 +379,7 @@ src/
 - API Key 存储在 IndexedDB，格式为 base64
 - **不提供加密**（demo/open source 项目）
 - IndexedDB 受操作系统权限保护
-- 建议用户妥善保管货物
+- 建议用户妥善保管货品
 
 ## 后续扩展建议
 
@@ -394,7 +394,7 @@ await db.system_config.put({ key: 'api_key', value: encryptedKey });
 
 ### 2. 数据导出
 ```typescript
-// 导出配置和货物数据
+// 导出配置和货品数据
 const exportData = async () => {
   const config = await db.system_config.toArray();
   const products = await db.products.toArray();
@@ -413,7 +413,7 @@ const importData = async (data) => {
 
 ### 4. 数据统计
 ```typescript
-// 统计货物状态分布
+// 统计货品状态分布
 const getStats = async () => {
   const products = await db.products.toArray();
   const stats = {

@@ -65,4 +65,4 @@ src/
 ```
 
 
-**LiteDepot** - 让货物管理更简单 (Making product management easier)
+**LiteDepot** - 让货品管理更简单 (Making product management easier)

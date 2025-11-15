@@ -17,11 +17,11 @@ interface ProductState {
 }
 
 /**
- * 货物列表存储 (ProductStore)
+ * 货品列表存储 (ProductStore)
  * Based on Technical Specification Section 7.2
  * 
  * 状态：
- * - products: 货物列表（从 IndexedDB 加载）
+ * - products: 货品列表（从 IndexedDB 加载）
  * - cloudProvider: 当前使用的云服务类型
  * - isLoading: 加载状态
  * - lastSyncTime: 上次同步时间
@@ -30,7 +30,7 @@ interface ProductState {
  * - loadProductsFromDB(): 从本地 IndexedDB 加载
  * - syncFromRemote(): 从云端同步（使用 ProviderFactory）
  * - getProductByCode(): 根据编号查找（用于扫码）
- * - updateProduct(): 更新货物（使用 ProviderFactory）
+ * - updateProduct(): 更新货品（使用 ProviderFactory）
  * 
  * 同步规则：
  * ✅ 始终以远端为准（覆盖本地）
@@ -50,8 +50,8 @@ export const useProductStore = create<ProductState>((set, get) => ({
   },
 
   /**
-   * 从 IndexedDB 加载货物列表
-   * 应用启动时调用，加载本地缓存的货物数据
+   * 从 IndexedDB 加载货品列表
+   * 应用启动时调用，加载本地缓存的货品数据
    */
   loadProductsFromDB: async () => {
     try {
@@ -61,7 +61,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
       // 如果有缓存，加载上次同步时间
       let lastSyncTime: number | null = null;
       if (products.length > 0) {
-        // 从货物记录中获取最新的更新时间
+        // 从货品记录中获取最新的更新时间
         const maxUpdatedAt = Math.max(...products.map(d => d.updated_at));
         lastSyncTime = maxUpdatedAt;
       }
@@ -74,7 +74,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
   },
 
   /**
-   * 从云端同步货物列表
+   * 从云端同步货品列表
    * 同步规则：始终以远端为准（覆盖本地）
    * 
    * @param viewId - 可选的视图 ID，用于筛选特定视图的数据
@@ -93,12 +93,12 @@ export const useProductStore = create<ProductState>((set, get) => ({
       // 从云端获取记录
       const records = await provider.getRecords(viewId);
       
-      // 清空本地货物数据（以远端为准）
+      // 清空本地货品数据（以远端为准）
       await db.products.clear();
       
       // 转换并保存记录到 IndexedDB
       const products: Product[] = records.map(record => {
-        // 尝试从不同字段获取货物 ID（兼容不同命名）
+        // 尝试从不同字段获取货品 ID（兼容不同命名）
         const productId = record.fields.product_id || record.fields.Product_ID || record.id;
         return {
           id: record.id,
@@ -126,11 +126,11 @@ export const useProductStore = create<ProductState>((set, get) => ({
   },
 
   /**
-   * 根据货物编号查找货物
-   * 用于扫码查找货物信息
+   * 根据货品编号查找货品
+   * 用于扫码查找货品信息
    * 
-   * @param code - 货物编号（二维码内容）
-   * @returns 找到的货物或 undefined
+   * @param code - 货品编号（二维码内容）
+   * @returns 找到的货品或 undefined
    */
   getProductByCode: (code: string) => {
     const products = get().products;
@@ -138,10 +138,10 @@ export const useProductStore = create<ProductState>((set, get) => ({
   },
 
   /**
-   * 更新货物信息
+   * 更新货品信息
    * 同时更新云端和本地 IndexedDB
    * 
-   * @param id - 货物记录 ID
+   * @param id - 货品记录 ID
    * @param fields - 要更新的字段
    */
   updateProduct: async (id: string, fields: Record<string, string | number | boolean | null | undefined>) => {
@@ -161,7 +161,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
         
         await db.products.put(updatedProduct);
         
-        // 更新内存中的货物列表
+        // 更新内存中的货品列表
         set({
           products: get().products.map(d => 
             d.id === id ? updatedProduct : d
@@ -175,7 +175,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
   },
 
   /**
-   * 清空所有货物数据
+   * 清空所有货品数据
    * 用于清除本地缓存
    */
   clearProducts: async () => {

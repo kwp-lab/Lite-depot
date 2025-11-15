@@ -115,7 +115,7 @@ export const SettingsPage: React.FC = () => {
   };
 
   const handleClearCache = async () => {
-    if (!confirm('确定要清除本地缓存吗？这将删除所有本地货物数据。')) {
+    if (!confirm('确定要清除本地缓存吗？这将删除所有本地货品数据。')) {
       return;
     }
     
@@ -362,7 +362,7 @@ export const SettingsPage: React.FC = () => {
               ) : (
                 <>
                   <RefreshCw className="mr-2 h-4 w-4" />
-                  同步货物列表
+                  同步货品列表
                 </>
               )}
             </Button>

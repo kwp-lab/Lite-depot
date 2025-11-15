@@ -20,14 +20,14 @@ interface OutboundState {
  * Based on Technical Specification Section 7.3
  * 
  * 状态：
- * - items: 出库货物列表
+ * - items: 出库货品列表
  * - cloudProvider: 当前使用的云服务类型
  * - borrowerName: 借用人姓名
  * - isSubmitting: 提交状态
  * 
  * 方法：
- * - addProduct(): 添加货物到出库篮
- * - removeProduct(): 从出库篮移除货物
+ * - addProduct(): 添加货品到出库篮
+ * - removeProduct(): 从出库篮移除货品
  * - submit(): 提交出库（批量更新）
  * - clear(): 清空出库篮
  * 
@@ -49,10 +49,10 @@ export const useOutboundStore = create<OutboundState>((set, get) => ({
   },
 
   /**
-   * 添加货物到出库篮
+   * 添加货品到出库篮
    * 自动检查是否已存在，避免重复添加
    * 
-   * @param product - 要添加的货物
+   * @param product - 要添加的货品
    */
   addProduct: (product: Product) => {
     const items = get().items;
@@ -68,9 +68,9 @@ export const useOutboundStore = create<OutboundState>((set, get) => ({
   },
 
   /**
-   * 从出库篮移除货物
+   * 从出库篮移除货品
    * 
-   * @param productId - 货物 ID
+   * @param productId - 货品 ID
    */
   removeProduct: (productId: string) => {
     set({
@@ -89,7 +89,7 @@ export const useOutboundStore = create<OutboundState>((set, get) => ({
 
   /**
    * 提交出库
-   * 批量更新货物状态，调用 Provider 的 batchUpdate 方法
+   * 批量更新货品状态，调用 Provider 的 batchUpdate 方法
    * 如果超过 10 条，Provider 会自动拆分为多批处理
    * 
    * @param employeeId - 操作员工号
@@ -102,7 +102,7 @@ export const useOutboundStore = create<OutboundState>((set, get) => ({
     
     // 验证出库篮不为空
     if (items.length === 0) {
-      throw new Error('没有待出库货物');
+      throw new Error('没有待出库货品');
     }
     
     // 验证借用人姓名已填写
@@ -139,7 +139,7 @@ export const useOutboundStore = create<OutboundState>((set, get) => ({
 
   /**
    * 清空出库篮
-   * 清除所有待出库货物和借用人信息
+   * 清除所有待出库货品和借用人信息
    */
   clear: () => {
     set({ items: [], borrowerName: '' });

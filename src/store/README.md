@@ -51,12 +51,12 @@ function MyComponent() {
 
 ---
 
-### 2. productStore（货物数据）
+### 2. productStore（货品数据）
 
 **文件**: `productStore.ts`
 
 **状态**:
-- `products`: 货物列表
+- `products`: 货品列表
 - `isLoading`: 加载状态
 - `lastSyncTime`: 上次同步时间
 - `cloudProvider`: 云服务提供者类型
@@ -65,9 +65,9 @@ function MyComponent() {
 - `loadProductsFromDB()`: 从本地 IndexedDB 加载
 - `syncFromRemote(viewId?)`: 从云端同步
 - `getProductByCode(code)`: 根据编号查找（扫码场景）
-- `updateProduct(id, fields)`: 更新货物
+- `updateProduct(id, fields)`: 更新货品
 - `setCloudProvider(provider)`: 设置云服务类型
-- `clearProducts()`: 清空本地货物缓存
+- `clearProducts()`: 清空本地货品缓存
 
 **使用场景**:
 ```typescript
@@ -79,9 +79,9 @@ function InboundPage() {
   const handleScan = (code: string) => {
     const product = getProductByCode(code);
     if (product) {
-      // 找到货物，显示详情
+      // 找到货品，显示详情
     } else {
-      // 未找到货物
+      // 未找到货品
     }
   };
   
@@ -103,14 +103,14 @@ function InboundPage() {
 **文件**: `outboundStore.ts`
 
 **状态**:
-- `items`: 出库货物列表
+- `items`: 出库货品列表
 - `borrowerName`: 借用人姓名
 - `isSubmitting`: 提交状态
 - `cloudProvider`: 云服务提供者类型
 
 **方法**:
-- `addProduct(product)`: 添加货物到出库篮
-- `removeProduct(id)`: 移除货物
+- `addProduct(product)`: 添加货品到出库篮
+- `removeProduct(id)`: 移除货品
 - `setBorrowerName(name)`: 设置借用人姓名
 - `submit(...)`: 提交出库（批量更新）
 - `setCloudProvider(provider)`: 设置云服务类型
@@ -159,7 +159,7 @@ function OutboundPage() {
 
 **方法**:
 - `startInventory()`: 开始盘点
-- `markScanned(productId)`: 标记货物已扫描
+- `markScanned(productId)`: 标记货品已扫描
 - `endInventory()`: 结束盘点，返回已扫描列表
 - `clear()`: 清空盘点记录
 
@@ -192,7 +192,7 @@ function InventoryPage() {
 ```
 进入盘点模式
   ↓
-扫码 → 查找对应货物
+扫码 → 查找对应货品
   ↓
 成功 → 更新 last_checked_at（云端）
   ↓
@@ -256,7 +256,7 @@ useEffect(() => {
       setCloudProvider(config.cloud_provider);
       setOutboundCloudProvider(config.cloud_provider);
       
-      // 4. 加载本地货物缓存
+      // 4. 加载本地货品缓存
       await loadProductsFromDB();
     }
   };
@@ -322,7 +322,7 @@ useEffect(() => {
                │
                ▼
      ┌─────────────────────┐
-     │ loadProductsFromDB() │ ← 加载本地货物缓存
+     │ loadProductsFromDB() │ ← 加载本地货品缓存
      └─────────┬───────────┘
                │
                ▼

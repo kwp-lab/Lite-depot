@@ -12,12 +12,12 @@
 
 ### 1. products 表
 
-从云端同步的货物列表（以远端为准）
+从云端同步的货品列表（以远端为准）
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| id | string | 货物唯一 ID（记录 ID，主键） |
-| product_id | string | 货物编号（二维码内容，索引） |
+| id | string | 货品唯一 ID（记录 ID，主键） |
+| product_id | string | 货品编号（二维码内容，索引） |
 | fields | object | AITable 返回的字段内容，动态结构 |
 | updated_at | number | 本地缓存更新时间戳（索引） |
 
@@ -27,7 +27,7 @@
 - `updated_at` (用于同步时间追踪)
 
 **用途**:
-- 缓存从云端同步的货物数据
+- 缓存从云端同步的货品数据
 - 支持离线查询和扫码查找
 - 同步规则：始终以远端为准（覆盖本地）
 
@@ -80,10 +80,10 @@ await dbHelpers.setConfigs({
 // 获取所有配置
 const allConfig = await dbHelpers.getAllConfigs();
 
-// 根据货物编号查找货物（扫码场景）
+// 根据货品编号查找货品（扫码场景）
 const product = await dbHelpers.findProductByCode('DEVICE001');
 
-// 批量更新货物
+// 批量更新货品
 await dbHelpers.bulkUpdateProducts(products);
 ```
 
@@ -134,7 +134,7 @@ await saveConfig({
 ### 手动同步流程
 
 ```
-用户点击"同步货物列表"
+用户点击"同步货品列表"
   ↓
 调用 productStore.syncFromRemote()
   ↓
@@ -224,7 +224,7 @@ try {
 - API Key 以 base64 存储在 IndexedDB 中
 - **不提供加密**（因是 demo open source）
 - IndexedDB 数据存储在用户本地，受操作系统权限保护
-- 建议用户妥善保管货物，避免未授权访问
+- 建议用户妥善保管货品，避免未授权访问
 
 ## 相关文档
 
