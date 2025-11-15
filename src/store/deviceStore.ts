@@ -1,12 +1,14 @@
 import { create } from 'zustand';
 import { Device } from '../types';
 import { db } from '../db';
-import { aiTableService } from '../api';
+import { ProviderFactory, CloudProviderType } from '../api';
 
 interface DeviceState {
   devices: Device[];
   isLoading: boolean;
   lastSyncTime: number | null;
+  cloudProvider: CloudProviderType;
+  setCloudProvider: (provider: CloudProviderType) => void;
   loadDevicesFromDB: () => Promise<void>;
   syncFromRemote: (viewId?: string) => Promise<void>;
   getDeviceByCode: (code: string) => Device | undefined;
@@ -18,6 +20,11 @@ export const useDeviceStore = create<DeviceState>((set, get) => ({
   devices: [],
   isLoading: false,
   lastSyncTime: null,
+  cloudProvider: 'aitable' as CloudProviderType,
+
+  setCloudProvider: (provider: CloudProviderType) => {
+    set({ cloudProvider: provider });
+  },
 
   loadDevicesFromDB: async () => {
     try {
@@ -34,11 +41,12 @@ export const useDeviceStore = create<DeviceState>((set, get) => ({
     try {
       set({ isLoading: true });
       
-      if (!aiTableService.isInitialized()) {
-        throw new Error('AITable service not initialized');
+      const provider = ProviderFactory.getProvider(get().cloudProvider);
+      if (!provider.isInitialized()) {
+        throw new Error('Provider not initialized');
       }
       
-      const records = await aiTableService.getRecords(viewId);
+      const records = await provider.getRecords(viewId);
       
       // Clear existing devices
       await db.devices.clear();
@@ -77,8 +85,9 @@ export const useDeviceStore = create<DeviceState>((set, get) => ({
 
   updateDevice: async (id: string, fields: Record<string, string | number | boolean | null | undefined>) => {
     try {
-      // Update in AITable
-      await aiTableService.updateRecord(id, fields);
+      // Update in Provider
+      const provider = ProviderFactory.getProvider(get().cloudProvider);
+      await provider.updateRecord(id, fields);
       
       // Update in local DB
       const device = get().devices.find(d => d.id === id);

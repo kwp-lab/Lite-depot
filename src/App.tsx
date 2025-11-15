@@ -7,11 +7,13 @@ import { OutboundPage } from './pages/OutboundPage';
 import { InventoryPage } from './pages/InventoryPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { useConfigStore, useDeviceStore } from './store';
-import { aiTableService } from './api';
+import { useOutboundStore } from './store/outboundStore';
+import { ProviderFactory, CloudProviderType } from './api';
 
 function App() {
   const { config, isConfigured, loadConfig } = useConfigStore();
-  const { loadDevicesFromDB } = useDeviceStore();
+  const { loadDevicesFromDB, setCloudProvider } = useDeviceStore();
+  const { setCloudProvider: setOutboundCloudProvider } = useOutboundStore();
 
   useEffect(() => {
     // Load configuration on app start
@@ -19,12 +21,20 @@ function App() {
   }, [loadConfig]);
 
   useEffect(() => {
-    // Initialize AITable service when config is loaded
+    // Initialize Provider when config is loaded
     if (isConfigured && config.api_key && config.base_id && config.table_id) {
-      aiTableService.initialize(config.api_key, config.base_id, config.table_id);
+      const providerType = (config.cloud_provider || 'aitable') as CloudProviderType;
+      const provider = ProviderFactory.getProvider(providerType);
+      provider.initialize({
+        apiKey: config.api_key,
+        baseId: config.base_id,
+        tableId: config.table_id,
+      });
+      setCloudProvider(providerType);
+      setOutboundCloudProvider(providerType);
       loadDevicesFromDB();
     }
-  }, [isConfigured, config, loadDevicesFromDB]);
+  }, [isConfigured, config, loadDevicesFromDB, setCloudProvider, setOutboundCloudProvider]);
 
   return (
     <BrowserRouter>

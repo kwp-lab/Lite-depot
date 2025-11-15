@@ -1,11 +1,13 @@
 import { create } from 'zustand';
 import { Device, OutboundItem } from '../types';
-import { aiTableService } from '../api';
+import { ProviderFactory, CloudProviderType } from '../api';
 
 interface OutboundState {
   items: OutboundItem[];
   borrowerName: string;
   isSubmitting: boolean;
+  cloudProvider: CloudProviderType;
+  setCloudProvider: (provider: CloudProviderType) => void;
   addDevice: (device: Device) => void;
   removeDevice: (deviceId: string) => void;
   setBorrowerName: (name: string) => void;
@@ -17,6 +19,11 @@ export const useOutboundStore = create<OutboundState>((set, get) => ({
   items: [],
   borrowerName: '',
   isSubmitting: false,
+  cloudProvider: 'aitable' as CloudProviderType,
+
+  setCloudProvider: (provider: CloudProviderType) => {
+    set({ cloudProvider: provider });
+  },
 
   addDevice: (device: Device) => {
     const items = get().items;
@@ -65,7 +72,8 @@ export const useOutboundStore = create<OutboundState>((set, get) => ({
         },
       }));
       
-      await aiTableService.batchUpdate(records);
+      const provider = ProviderFactory.getProvider(get().cloudProvider);
+      await provider.batchUpdate(records);
       
       // Clear after successful submission
       set({ items: [], borrowerName: '', isSubmitting: false });

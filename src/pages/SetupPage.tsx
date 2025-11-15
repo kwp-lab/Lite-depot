@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
 import { useConfigStore } from '@/store';
-import { aiTableService } from '@/api';
+import { ProviderFactory } from '@/api';
 import { Loader2 } from 'lucide-react';
 
 export const SetupPage: React.FC = () => {
@@ -12,6 +12,7 @@ export const SetupPage: React.FC = () => {
   const { saveConfig } = useConfigStore();
   
   const [formData, setFormData] = useState({
+    cloud_provider: 'aitable',
     employee_id: '',
     api_key: '',
     base_id: '',
@@ -43,12 +44,17 @@ export const SetupPage: React.FC = () => {
         return;
       }
       
-      // Initialize AITable service
-      aiTableService.initialize(formData.api_key, formData.base_id, formData.table_id);
+      // Initialize Provider
+      const provider = ProviderFactory.getProvider(formData.cloud_provider as any);
+      provider.initialize({
+        apiKey: formData.api_key,
+        baseId: formData.base_id,
+        tableId: formData.table_id,
+      });
       
       // Test connection by trying to fetch schema
       try {
-        await aiTableService.getSchema();
+        await provider.getSchema();
       } catch {
         throw new Error('连接 AITable 失败，请检查 API Key 和 ID 是否正确');
       }

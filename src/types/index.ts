@@ -10,12 +10,33 @@ export interface AITableField {
 
 export interface AITableRecord {
   id: string;
-  fields: Record<string, string | number | boolean | null | undefined>;
+  fields: Record<string, any>;
   createdTime?: string;
 }
 
 export interface AITableSchema {
   fields: AITableField[];
+}
+
+// Provider related types
+export interface ProviderConfig {
+  [key: string]: any;
+}
+
+export interface ProviderRecord {
+  id: string;
+  fields: Record<string, any>;
+  createdTime?: string;
+  [key: string]: any;
+}
+
+export interface ProviderSchema {
+  fields: Array<{
+    id: string;
+    name: string;
+    type: string;
+    [key: string]: any;
+  }>;
 }
 
 // Device related types
@@ -33,6 +54,7 @@ export interface SystemConfig {
 }
 
 export interface AppConfig {
+  cloud_provider: string; // 云服务提供者，如 'aitable', 'notion' 等
   employee_id: string;
   api_key: string;
   base_id: string;

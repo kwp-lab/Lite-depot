@@ -1,5 +1,6 @@
 import { HttpClient } from './http';
 import { AITableSchema, AITableRecord } from '../types';
+import { BaseProvider } from './base-provider';
 
 interface FieldSchemaResponse {
   code: number;
@@ -14,16 +15,41 @@ interface RecordsResponse {
   records: AITableRecord[];
 }
 
-export class AITableService {
+interface AITableConfig {
+  apiKey: string;
+  baseId: string;
+  tableId: string;
+}
+
+/**
+ * AITable 服务提供者
+ * 实现 BaseProvider 定义的所有数据操作接口
+ */
+export class AITableProvider extends BaseProvider<AITableRecord, AITableSchema> {
   private http: HttpClient | null = null;
   private baseId: string = '';
   private tableId: string = '';
 
-  initialize(apiKey: string, baseId: string, tableId: string) {
-    const baseURL = 'https://aitable.ai/fusion/v1';
-    this.http = new HttpClient(baseURL, apiKey);
-    this.baseId = baseId;
-    this.tableId = tableId;
+  /**
+   * 初始化 AITable 服务
+   * @param config 包含 apiKey, baseId, tableId 的配置对象
+   */
+  initialize(config: AITableConfig): void;
+  initialize(apiKey: string, baseId: string, tableId: string): void;
+  initialize(configOrApiKey: AITableConfig | string, baseId?: string, tableId?: string): void {
+    if (typeof configOrApiKey === 'object') {
+      const config = configOrApiKey;
+      const baseURL = 'https://aitable.ai/fusion/v1';
+      this.http = new HttpClient(baseURL, config.apiKey);
+      this.baseId = config.baseId;
+      this.tableId = config.tableId;
+    } else {
+      const apiKey = configOrApiKey;
+      const baseURL = 'https://aitable.ai/fusion/v1';
+      this.http = new HttpClient(baseURL, apiKey);
+      this.baseId = baseId!;
+      this.tableId = tableId!;
+    }
   }
 
   isInitialized(): boolean {
@@ -57,7 +83,31 @@ export class AITableService {
     return response.records || [];
   }
 
-  async updateRecord(id: string, fields: Record<string, string | number | boolean | null | undefined>): Promise<AITableRecord> {
+  async createRecord(fields: Record<string, any>): Promise<AITableRecord> {
+    if (!this.http) throw new Error('AITable service not initialized');
+    
+    const url = `/${this.baseId}/${this.tableId}`;
+    const response = await this.http.post<{ record: AITableRecord }>(url, { fields });
+    return response.record;
+  }
+
+  async batchCreate(records: Array<{ fields: Record<string, any> }>): Promise<AITableRecord[]> {
+    if (!this.http) throw new Error('AITable service not initialized');
+    
+    const url = `/${this.baseId}/${this.tableId}`;
+    const batchSize = 10;
+    const results: AITableRecord[] = [];
+    
+    for (let i = 0; i < records.length; i += batchSize) {
+      const batch = records.slice(i, i + batchSize);
+      const response = await this.http.post<RecordsResponse>(url, { records: batch });
+      results.push(...(response.records || []));
+    }
+    
+    return results;
+  }
+
+  async updateRecord(id: string, fields: Record<string, any>): Promise<AITableRecord> {
     if (!this.http) throw new Error('AITable service not initialized');
     
     const url = `/${this.baseId}/${this.tableId}/${id}`;
@@ -65,7 +115,7 @@ export class AITableService {
     return response;
   }
 
-  async batchUpdate(records: Array<{ id: string; fields: Record<string, string | number | boolean | null | undefined> }>): Promise<AITableRecord[]> {
+  async batchUpdate(records: Array<{ id: string; fields: Record<string, any> }>): Promise<AITableRecord[]> {
     if (!this.http) throw new Error('AITable service not initialized');
     
     const url = `/${this.baseId}/${this.tableId}`;
@@ -81,11 +131,41 @@ export class AITableService {
     return results;
   }
 
-  updateApiKey(apiKey: string) {
-    if (this.http) {
-      this.http.updateApiKey(apiKey);
+  async deleteRecord(id: string): Promise<boolean> {
+    if (!this.http) throw new Error('AITable service not initialized');
+    
+    const url = `/${this.baseId}/${this.tableId}/${id}`;
+    await this.http.delete(url);
+    return true;
+  }
+
+  async batchDelete(ids: string[]): Promise<boolean> {
+    if (!this.http) throw new Error('AITable service not initialized');
+    
+    const batchSize = 10;
+    
+    for (let i = 0; i < ids.length; i += batchSize) {
+      const batch = ids.slice(i, i + batchSize);
+      for (const id of batch) {
+        const url = `/${this.baseId}/${this.tableId}/${id}`;
+        await this.http.delete(url);
+      }
+    }
+    
+    return true;
+  }
+
+  updateCredentials(credentials: { apiKey?: string }): void {
+    if (credentials.apiKey && this.http) {
+      this.http.updateApiKey(credentials.apiKey);
     }
   }
-}
 
-export const aiTableService = new AITableService();
+  /**
+   * 兼容旧的方法名
+   * @deprecated 使用 updateCredentials 代替
+   */
+  updateApiKey(apiKey: string): void {
+    this.updateCredentials({ apiKey });
+  }
+}

@@ -3,8 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/Card';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useConfigStore, useDeviceStore } from '@/store';
-import { aiTableService } from '@/api';
+import { ProviderFactory } from '@/api';
 import { Loader2, Save, Trash2, RefreshCw } from 'lucide-react';
 
 export const SettingsPage: React.FC = () => {
@@ -13,6 +20,7 @@ export const SettingsPage: React.FC = () => {
   const { syncFromRemote, lastSyncTime, clearDevices } = useDeviceStore();
   
   const [formData, setFormData] = useState({
+    cloud_provider: 'aitable',
     employee_id: '',
     api_key: '',
     base_id: '',
@@ -43,6 +51,13 @@ export const SettingsPage: React.FC = () => {
     }));
   };
 
+  const handleProviderChange = (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      cloud_provider: value,
+    }));
+  };
+
   const handleSave = async () => {
     try {
       setIsSaving(true);
@@ -55,8 +70,13 @@ export const SettingsPage: React.FC = () => {
       
       await saveConfig(formData);
       
-      // Initialize AITable service
-      aiTableService.initialize(formData.api_key, formData.base_id, formData.table_id);
+      // Initialize provider
+      const provider = ProviderFactory.getProvider(formData.cloud_provider as any);
+      provider.initialize({
+        apiKey: formData.api_key,
+        baseId: formData.base_id,
+        tableId: formData.table_id,
+      });
       
       alert('配置保存成功！');
       
@@ -76,7 +96,8 @@ export const SettingsPage: React.FC = () => {
     try {
       setIsSyncing(true);
       
-      if (!aiTableService.isInitialized()) {
+      const provider = ProviderFactory.getProvider(formData.cloud_provider as any);
+      if (!provider.isInitialized()) {
         alert('请先保存配置');
         return;
       }
@@ -125,9 +146,28 @@ export const SettingsPage: React.FC = () => {
       <Card className="mb-6">
         <CardHeader>
           <CardTitle>基本配置</CardTitle>
-          <CardDescription>配置 AITable API 连接信息</CardDescription>
+          <CardDescription>配置云服务 API 连接信息</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-2">云服务 *</label>
+            <Select value={formData.cloud_provider} onValueChange={handleProviderChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="选择云服务提供者" />
+              </SelectTrigger>
+              <SelectContent>
+                {ProviderFactory.getAvailableProviders().map((provider) => (
+                  <SelectItem key={provider.value} value={provider.value}>
+                    <div className="flex flex-col">
+                      <span>{provider.label}</span>
+                      <span className="text-xs text-muted-foreground">{provider.description}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
           <div>
             <label className="block text-sm font-medium mb-2">工号 *</label>
             <Input
