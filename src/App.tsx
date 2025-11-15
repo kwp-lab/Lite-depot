@@ -41,8 +41,6 @@ function App() {
     <ThemeProvider defaultTheme="system" storageKey="lite-depot-theme">
       <BrowserRouter>
         <Routes>
-          <Route path="/setup" element={<SetupPage />} />
-          
           {isConfigured ? (
             <Route element={<Layout />}>
               <Route path="/inbound" element={<InboundPage />} />
@@ -50,10 +48,12 @@ function App() {
               <Route path="/inventory" element={<InventoryPage />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/" element={<Navigate to="/inbound" replace />} />
+              <Route path="/setup" element={<Navigate to="/inbound" replace />} />
               <Route path="*" element={<Navigate to="/inbound" replace />} />
             </Route>
           ) : (
             <>
+              <Route path="/setup" element={<SetupPage />} />
               <Route path="/" element={<Navigate to="/setup" replace />} />
               <Route path="*" element={<Navigate to="/setup" replace />} />
             </>
