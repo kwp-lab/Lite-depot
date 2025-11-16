@@ -85,6 +85,11 @@ export class AITableProvider extends BaseProvider<AITableRecord, AITableSchema> 
     }
     
     const response = await this.http.get<RecordsResponse>(url, params);
+
+    if (!response.success || !response.data.records) {
+      throw new Error(response.message || 'Failed to get records');
+    } 
+
     return response.data.records || [];
   }
 
@@ -92,11 +97,16 @@ export class AITableProvider extends BaseProvider<AITableRecord, AITableSchema> 
     if (!this.http) throw new Error('AITable service not initialized');
     
     const url = `/datasheets/${this.datasheetId}/records`;
-    const response = await this.http.post<{ record: AITableRecord }>(url, { 
+    const response = await this.http.post<RecordsResponse>(url, { 
       records: [{ fields }],
       fieldKey: "name"
-     });
-    return response.record;
+    });
+
+    if (!response.success || !response.data.records) {
+      throw new Error(response.message || 'Failed to create record');
+    } 
+
+    return response.data.records[0];
   }
 
   async batchCreate(records: Array<{ fields: Record<string, any> }>): Promise<AITableRecord[]> {
@@ -109,6 +119,9 @@ export class AITableProvider extends BaseProvider<AITableRecord, AITableSchema> 
     for (let i = 0; i < records.length; i += batchSize) {
       const batch = records.slice(i, i + batchSize);
       const response = await this.http.post<RecordsResponse>(url, { records: batch, fieldKey: "name" });
+      if (!response.success || !response.data.records) {
+        throw new Error(response.message || 'Failed to create record');
+      } 
       results.push(...(response.data.records || []));
     }
     
@@ -119,11 +132,16 @@ export class AITableProvider extends BaseProvider<AITableRecord, AITableSchema> 
     if (!this.http) throw new Error('AITable service not initialized');
     
     const url = `/datasheets/${this.datasheetId}/records`;
-    const response = await this.http.patch<AITableRecord>(url, { 
+    const response = await this.http.patch<RecordsResponse>(url, { 
       records: [{ recordId: id, fields }],
       fieldKey: "name"
     });
-    return response;
+
+    if (!response.success || !response.data.records) {
+      throw new Error(response.message || 'Failed to update record');
+    }
+
+    return response.data.records[0];
   }
 
   async batchUpdate(records: Array<{ id: string; fields: Record<string, any> }>): Promise<AITableRecord[]> {
@@ -136,6 +154,11 @@ export class AITableProvider extends BaseProvider<AITableRecord, AITableSchema> 
     for (let i = 0; i < records.length; i += batchSize) {
       const batch = records.slice(i, i + batchSize).map(r => ({ recordId: r.id, fields: r.fields }));
       const response = await this.http.patch<RecordsResponse>(url, { records: batch, fieldKey: "name" });
+
+      if (!response.success || !response.data.records) {
+        throw new Error(response.message || 'Failed to update record');
+      }
+
       results.push(...(response.data.records || []));
     }
     
@@ -146,7 +169,12 @@ export class AITableProvider extends BaseProvider<AITableRecord, AITableSchema> 
     if (!this.http) throw new Error('AITable service not initialized');
     
     const url = `/datasheets/${this.datasheetId}/records`;
-    await this.http.delete(url, { recordIds: [id] });
+    const response = await this.http.delete<RecordsResponse>(url, { recordIds: [id] });
+
+    if (!response.success) {
+      throw new Error(response.message || 'Failed to delete record');
+    }
+
     return true;
   }
 
@@ -158,7 +186,10 @@ export class AITableProvider extends BaseProvider<AITableRecord, AITableSchema> 
     
     for (let i = 0; i < ids.length; i += batchSize) {
       const batch = ids.slice(i, i + batchSize);
-      await this.http.delete(url, { recordIds: batch });
+      const response = await this.http.delete<RecordsResponse>(url, { recordIds: batch });
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to delete record');
+      }
     }
     
     return true;

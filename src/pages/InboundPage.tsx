@@ -7,6 +7,7 @@ import { Product } from '@/types';
 import { formatDate } from '@/lib/utils';
 import { Loader2, CheckCircle, AlertCircle, Search, LogIn } from 'lucide-react';
 import { ProviderFactory, CloudProviderType } from '../api';
+import { toast } from "sonner"
 
 export const InboundPage: React.FC = () => {
   const { config } = useConfigStore();
@@ -112,7 +113,7 @@ export const InboundPage: React.FC = () => {
       console.log('Creating record with fields:', fields);
       await provider.createRecord(fields);
       
-      setMessage({ type: 'success', text: '入库成功！' });
+      toast.success("入库成功！")
       setCurrentProduct(null);
       setScanCode('');
       
