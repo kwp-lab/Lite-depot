@@ -15,6 +15,7 @@ export const InboundPage: React.FC = () => {
   
   const [scanCode, setScanCode] = useState('');
   const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
+  const [quantity, setQuantity] = useState('1');
   const [isProcessing, setIsProcessing] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   
@@ -42,6 +43,7 @@ export const InboundPage: React.FC = () => {
     const product = getProductByCode(trimmedCode);
     if (product) {
       setCurrentProduct(product);
+      setQuantity('1');
       setMessage(null);
     } else {
       setCurrentProduct(null);
@@ -105,7 +107,7 @@ export const InboundPage: React.FC = () => {
       const fields: Record<string, string | number | boolean | null | undefined> = {
         [config.sku_field || 'SKU']: currentProduct.product_id,
         [config.type_field || 'Type']: 'in',
-        [config.quantity_field || 'Quantity']: '1',
+        [config.quantity_field || 'Quantity']: quantity,
         [config.operator_field || 'Employee']: config.employee_name || '未知',
         [config.time_field || 'Date']: new Date().toISOString(),
       };
@@ -116,6 +118,7 @@ export const InboundPage: React.FC = () => {
       toast.success("入库成功！")
       setCurrentProduct(null);
       setScanCode('');
+      setQuantity('1');
       
       // Auto-clear success message
       setTimeout(() => {
@@ -215,10 +218,22 @@ export const InboundPage: React.FC = () => {
                   ))}
                 </div>
 
-                <div className="pt-4 border-t">
+                <div className="pt-4 border-t space-y-4">
+                  <div>
+                    <label className="text-sm text-muted-foreground mb-2 block">入库数量</label>
+                    <Input
+                      type="number"
+                      min="1"
+                      value={quantity}
+                      onChange={(e) => setQuantity(e.target.value)}
+                      placeholder="请输入入库数量"
+                      className="text-lg"
+                    />
+                  </div>
+
                   <Button
                     onClick={handleInbound}
-                    disabled={isProcessing}
+                    disabled={isProcessing || !quantity || parseInt(quantity) <= 0}
                     className="w-full"
                     size="lg"
                   >

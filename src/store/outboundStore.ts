@@ -4,14 +4,12 @@ import { ProviderFactory, CloudProviderType } from '../api';
 
 interface OutboundState {
   items: OutboundItem[];
-  borrowerName: string;
   isSubmitting: boolean;
   cloudProvider: CloudProviderType;
   setCloudProvider: (provider: CloudProviderType) => void;
   addProduct: (product: Product) => void;
   removeProduct: (productId: string) => void;
-  setBorrowerName: (name: string) => void;
-  submit: (employeeName: string, statusField: string, borrowerField: string, outboundTimeField: string) => Promise<void>;
+  updateQuantity: (productId: string, quantity: number) => void;
   clear: () => void;
 }
 
@@ -63,7 +61,7 @@ export const useOutboundStore = create<OutboundState>((set, get) => ({
     }
     
     set({
-      items: [...items, { product, addedAt: Date.now() }],
+      items: [...items, { product, quantity: 1, addedAt: Date.now() }],
     });
   },
 
@@ -79,62 +77,17 @@ export const useOutboundStore = create<OutboundState>((set, get) => ({
   },
 
   /**
-   * 设置借用人姓名
+   * 更新货品出库数量
    * 
-   * @param name - 借用人姓名
+   * @param productId - 货品 ID
+   * @param quantity - 新的数量
    */
-  setBorrowerName: (name: string) => {
-    set({ borrowerName: name });
-  },
-
-  /**
-   * 提交出库
-   * 批量更新货品状态，调用 Provider 的 batchUpdate 方法
-   * 如果超过 10 条，Provider 会自动拆分为多批处理
-   * 
-   * @param employeeName - 操作员员工
-   * @param statusField - 状态字段名
-   * @param borrowerField - 借用人字段名
-   * @param outboundTimeField - 出库时间字段名
-   */
-  submit: async (employeeName: string, statusField: string, borrowerField: string, outboundTimeField: string) => {
-    const { items, borrowerName } = get();
-    
-    // 验证出库篮不为空
-    if (items.length === 0) {
-      throw new Error('没有待出库货品');
-    }
-    
-    // 验证借用人姓名已填写
-    if (!borrowerName.trim()) {
-      throw new Error('请输入借用人姓名');
-    }
-    
-    try {
-      set({ isSubmitting: true });
-      
-      // 构建批量更新记录
-      const records = items.map(item => ({
-        id: item.product.id,
-        fields: {
-          [statusField]: '出库',
-          [borrowerField]: borrowerName,
-          [outboundTimeField]: new Date().toISOString(),
-          operator: employeeName,
-        },
-      }));
-      
-      // 使用 Provider 批量更新（Provider 内部会处理 >10 条的拆分）
-      const provider = ProviderFactory.getProvider(get().cloudProvider);
-      await provider.batchUpdate(records);
-      
-      // 提交成功后清空出库篮
-      set({ items: [], borrowerName: '', isSubmitting: false });
-    } catch (error) {
-      console.error('Failed to submit outbound:', error);
-      set({ isSubmitting: false });
-      throw error;
-    }
+  updateQuantity: (productId: string, quantity: number) => {
+    set({
+      items: get().items.map(item =>
+        item.product.id === productId ? { ...item, quantity } : item
+      ),
+    });
   },
 
   /**
@@ -142,6 +95,6 @@ export const useOutboundStore = create<OutboundState>((set, get) => ({
    * 清除所有待出库货品和借用人信息
    */
   clear: () => {
-    set({ items: [], borrowerName: '' });
+    set({ items: [] });
   },
 }));

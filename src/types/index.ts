@@ -64,6 +64,7 @@ export interface AppConfig {
 // Outbound related types
 export interface OutboundItem {
   product: Product;
+  quantity: number;
   addedAt: number;
 }
 

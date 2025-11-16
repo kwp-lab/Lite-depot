@@ -53,11 +53,11 @@ export const InventoryPage: React.FC = () => {
     }
 
     try {
-      // Update in AITable
-      const fields: Record<string, string | number | boolean | null | undefined> = {
-        [config.checked_time_field || 'last_checked_at']: new Date().toISOString(),
-      };
-      await updateProduct(product.id, fields);
+      // // Update in AITable
+      // const fields: Record<string, string | number | boolean | null | undefined> = {
+      //   [config.checked_time_field || 'last_checked_at']: new Date().toISOString(),
+      // };
+      // await updateProduct(product.id, fields);
 
       // Mark as scanned locally
       markScanned(product.product_id);
@@ -76,7 +76,7 @@ export const InventoryPage: React.FC = () => {
       console.error('Inventory check failed:', error);
       setMessage({ type: 'error', text: '盘点失败：' + (error as Error).message });
     }
-  }, [getProductByCode, scannedToday, config.checked_time_field, updateProduct, markScanned]);
+  }, [getProductByCode, scannedToday, updateProduct, markScanned]);
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -195,16 +195,16 @@ export const InventoryPage: React.FC = () => {
                     <CardTitle>扫码区</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <form onSubmit={handleManualScan} className="flex space-x-2">
+                    <form onSubmit={handleManualScan} className="grid grid-cols-12 gap-2">
                       <Input
                         ref={inputRef}
                         value={scanCode}
                         onChange={(e) => setScanCode(e.target.value)}
                         placeholder="扫描货品条码..."
-                        className="text-lg"
+                        className="text-lg col-span-10"
                         autoFocus
                       />
-                      <Button type="submit">盘点</Button>
+                      <Button type="submit" className="col-span-2">盘点</Button>
                     </form>
                   </CardContent>
                 </Card>
