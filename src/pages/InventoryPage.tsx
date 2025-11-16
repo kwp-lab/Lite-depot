@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/Card';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
 import { useConfigStore, useProductStore, useInventoryStore } from '@/store';
-import { formatDate } from '@/lib/utils';
+
 import { CheckCircle, AlertCircle, ClipboardCheck, FileText } from 'lucide-react';
 
 export const InventoryPage: React.FC = () => {
+  const { t } = useTranslation();
   const { config } = useConfigStore();
   const { products, getProductByCode, updateProduct, loadProductsFromDB } = useProductStore();
   const { scannedToday, isActive, startInventory, markScanned, endInventory, clear } = useInventoryStore();
@@ -40,14 +42,14 @@ export const InventoryPage: React.FC = () => {
     
     const product = getProductByCode(trimmedCode);
     if (!product) {
-      setMessage({ type: 'error', text: '找不到该货品' });
+      setMessage({ type: 'error', text: t('inventory.productNotFound') });
       setTimeout(() => setMessage(null), 2000);
       return;
     }
 
     // Check if already scanned
     if (scannedToday.has(product.product_id)) {
-      setMessage({ type: 'error', text: '该货品今日已盘点' });
+      setMessage({ type: 'error', text: t('inventory.alreadyScanned') });
       setTimeout(() => setMessage(null), 2000);
       return;
     }
@@ -68,15 +70,15 @@ export const InventoryPage: React.FC = () => {
         time: Date.now()
       }, ...prev].slice(0, 20));
 
-      setMessage({ type: 'success', text: '盘点成功' });
+      setMessage({ type: 'success', text: t('inventory.inventorySuccess') });
       setScanCode('');
       inputRef.current?.focus();
       setTimeout(() => setMessage(null), 1500);
     } catch (error) {
       console.error('Inventory check failed:', error);
-      setMessage({ type: 'error', text: '盘点失败：' + (error as Error).message });
+      setMessage({ type: 'error', text: t('inventory.inventoryFailed') + (error as Error).message });
     }
-  }, [getProductByCode, scannedToday, updateProduct, markScanned]);
+  }, [getProductByCode, scannedToday, updateProduct, markScanned, t]);
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -135,7 +137,7 @@ export const InventoryPage: React.FC = () => {
   };
 
   const handleReset = () => {
-    if (confirm('确定要重置盘点状态吗？')) {
+    if (confirm(t('inventory.confirmReset'))) {
       clear();
       setScannedList([]);
       setShowUnscanned(false);
@@ -149,14 +151,14 @@ export const InventoryPage: React.FC = () => {
       <div className="bg-card border-b border-border p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">货品盘点</h1>
+            <h1 className="text-2xl font-bold">{t('inventory.title')}</h1>
             <p className="text-sm text-muted-foreground mt-1">
-              {`已同步货品数: ${products.length}`}
+              {t('inventory.syncedProducts')} {products.length}
             </p>
           </div>
           <div className="text-right">
-            <p className="text-sm text-muted-foreground">操作员</p>
-            <p className="font-medium">{config.employee_name || '未设置'}</p>
+            <p className="text-sm text-muted-foreground">{t('common.operator')}</p>
+            <p className="font-medium">{config.employee_name || t('common.notSet')}</p>
           </div>
         </div>
       </div>
@@ -173,15 +175,15 @@ export const InventoryPage: React.FC = () => {
                   {!isActive ? (
                     <Button onClick={handleStart} className="w-full" size="lg">
                       <ClipboardCheck className="w-5 h-5 mr-2" />
-                      开始盘点
+                      {t('inventory.startInventory')}
                     </Button>
                   ) : (
                     <div className="space-y-2">
                       <Button onClick={handleEnd} variant="outline" className="w-full">
-                        结束盘点
+                        {t('inventory.endInventory')}
                       </Button>
                       <Button onClick={handleReset} variant="ghost" className="w-full">
-                        重置
+                        {t('common.reset')}
                       </Button>
                     </div>
                   )}
@@ -192,7 +194,7 @@ export const InventoryPage: React.FC = () => {
               {isActive && (
                 <Card>
                   <CardHeader>
-                    <CardTitle>扫码区</CardTitle>
+                    <CardTitle>{t('inventory.scanAreaTitle')}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <form onSubmit={handleManualScan} className="grid grid-cols-12 gap-2">
@@ -200,11 +202,11 @@ export const InventoryPage: React.FC = () => {
                         ref={inputRef}
                         value={scanCode}
                         onChange={(e) => setScanCode(e.target.value)}
-                        placeholder="扫描货品条码..."
+                        placeholder={t('inventory.scanPlaceholder')}
                         className="text-lg col-span-10"
                         autoFocus
                       />
-                      <Button type="submit" className="col-span-2">盘点</Button>
+                      <Button type="submit" className="col-span-2">{t('inventory.inventoryButton')}</Button>
                     </form>
                   </CardContent>
                 </Card>
@@ -231,7 +233,7 @@ export const InventoryPage: React.FC = () => {
               {/* Stats */}
               <Card>
                 <CardHeader>
-                  <CardTitle>盘点统计</CardTitle>
+                  <CardTitle>{t('inventory.statsTitle')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 gap-4">
@@ -240,7 +242,7 @@ export const InventoryPage: React.FC = () => {
                         {scannedToday.size}
                       </div>
                       <div className="text-sm text-muted-foreground mt-1">
-                        已盘点
+                        {t('inventory.scanned')}
                       </div>
                     </div>
                     <div className="text-center p-4 bg-muted rounded-md">
@@ -248,7 +250,7 @@ export const InventoryPage: React.FC = () => {
                         {products.length}
                       </div>
                       <div className="text-sm text-muted-foreground mt-1">
-                        总货品数
+                        {t('inventory.totalProducts')}
                       </div>
                     </div>
                   </div>
@@ -261,12 +263,12 @@ export const InventoryPage: React.FC = () => {
               {!showUnscanned ? (
                 <Card>
                   <CardHeader>
-                    <CardTitle>今日已盘点 ({scannedList.length})</CardTitle>
+                    <CardTitle>{t('inventory.todayScanned')} ({scannedList.length})</CardTitle>
                   </CardHeader>
                   <CardContent>
                     {scannedList.length === 0 ? (
                       <div className="text-center text-muted-foreground py-8">
-                        暂无盘点记录
+                        {t('inventory.noRecentScans')}
                       </div>
                     ) : (
                       <div className="space-y-2 max-h-[600px] overflow-auto">
@@ -294,10 +296,10 @@ export const InventoryPage: React.FC = () => {
                     <div className="flex items-center justify-between">
                       <CardTitle className="flex items-center">
                         <FileText className="w-5 h-5 mr-2" />
-                        未盘点货品 ({unscannedProducts.length})
+                        {t('inventory.unscannedTitle')} ({unscannedProducts.length})
                       </CardTitle>
                       <Button variant="ghost" size="sm" onClick={() => setShowUnscanned(false)}>
-                        返回
+                        {t('inventory.backButton')}
                       </Button>
                     </div>
                   </CardHeader>
@@ -305,7 +307,7 @@ export const InventoryPage: React.FC = () => {
                     {unscannedProducts.length === 0 ? (
                       <div className="text-center text-green-600 py-8">
                         <CheckCircle className="w-12 h-12 mx-auto mb-2" />
-                        <p className="font-medium">所有货品已盘点完成！</p>
+                        <p className="font-medium">{t('inventory.allCompleted')}</p>
                       </div>
                     ) : (
                       <div className="space-y-2 max-h-[600px] overflow-auto">

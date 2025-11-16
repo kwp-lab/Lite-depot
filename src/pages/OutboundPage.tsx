@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/Card';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
 import { useConfigStore, useProductStore, useOutboundStore } from '@/store';
-import { formatDate } from '@/lib/utils';
+
 import { CheckCircle, AlertCircle, Trash2, Package, Plus, Loader2 } from 'lucide-react';
 import { toast } from "sonner"
 import { ProviderFactory, CloudProviderType } from '../api';
 
 export const OutboundPage: React.FC = () => {
+  const { t } = useTranslation();
   const { config } = useConfigStore();
   const { products, getProductByCode, loadProductsFromDB } = useProductStore();
   const { items, addProduct, removeProduct, updateQuantity, clear } = useOutboundStore();
@@ -39,24 +41,24 @@ export const OutboundPage: React.FC = () => {
     
     const product = getProductByCode(trimmedCode);
     if (!product) {
-      setMessage({ type: 'error', text: '找不到该货品，请确认货品资料已同步至本地' });
+      setMessage({ type: 'error', text: t('outbound.productNotFound') });
       setTimeout(() => setMessage(null), 2000);
       return;
     }
 
     // Check if already in list
     if (items.some((item) => item.product.id === product.id)) {
-      setMessage({ type: 'error', text: '该货品已在出库列表中' });
+      setMessage({ type: 'error', text: t('outbound.productAlreadyInList') });
       setTimeout(() => setMessage(null), 2000);
       return;
     }
 
     addProduct(product);
-    setMessage({ type: 'success', text: '添加成功' });
+    setMessage({ type: 'success', text: t('outbound.addSuccess') });
     setScanCode('');
     inputRef.current?.focus();
     setTimeout(() => setMessage(null), 1500);
-  }, [getProductByCode, items, addProduct]);
+  }, [getProductByCode, items, addProduct, t]);
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -116,21 +118,21 @@ export const OutboundPage: React.FC = () => {
       
       await provider.batchCreate(records);
 
-      toast.success("出库成功！")
+      toast.success(t('outbound.outboundSuccess'))
       setTimeout(() => {
         setMessage(null);
         inputRef.current?.focus();
       }, 2000);
     } catch (error) {
       console.error('Outbound failed:', error);
-      setMessage({ type: 'error', text: (error as Error).message });
+      setMessage({ type: 'error', text: t('outbound.outboundFailed') + (error as Error).message });
     } finally {
       setIsProcessing(false);
     }
   };
 
   const handleClear = () => {
-    if (confirm('确定要清空出库列表吗？')) {
+    if (confirm(t('outbound.confirmClearList'))) {
       clear();
     }
   };
@@ -141,14 +143,14 @@ export const OutboundPage: React.FC = () => {
       <div className="bg-card border-b border-border p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">货品出库</h1>
+            <h1 className="text-2xl font-bold">{t('outbound.title')}</h1>
             <p className="text-sm text-muted-foreground mt-1">
-              {`已同步货品数: ${products.length}`}
+              {t('outbound.syncedProducts')} {products.length}
             </p>
           </div>
           <div className="text-right">
-            <p className="text-sm text-muted-foreground">操作员</p>
-            <p className="font-medium">{config.employee_name || '未设置'}</p>
+            <p className="text-sm text-muted-foreground">{t('common.operator')}</p>
+            <p className="font-medium">{config.employee_name || t('common.notSet')}</p>
           </div>
         </div>
       </div>
@@ -161,7 +163,7 @@ export const OutboundPage: React.FC = () => {
             <div className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>扫码区</CardTitle>
+                  <CardTitle>{t('outbound.scanAreaTitle')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleManualScan} className="flex space-x-2">
@@ -169,7 +171,7 @@ export const OutboundPage: React.FC = () => {
                       ref={inputRef}
                       value={scanCode}
                       onChange={(e) => setScanCode(e.target.value)}
-                      placeholder="扫描货品条码..."
+                      placeholder={t('outbound.scanPlaceholder')}
                       className="text-lg"
                       autoFocus
                     />
@@ -198,8 +200,8 @@ export const OutboundPage: React.FC = () => {
 
               <Card className="bg-muted">
                 <CardContent className="p-6 text-center text-muted-foreground">
-                  <p>扫描货品条码将其添加到右侧出库列表</p>
-                  <p className="text-sm mt-2">支持批量扫码</p>
+                  <p>{t('outbound.scanTips')}</p>
+                  <p className="text-sm mt-2">{t('outbound.batchScanSupport')}</p>
                 </CardContent>
               </Card>
             </div>
@@ -211,12 +213,12 @@ export const OutboundPage: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center">
                       <Package className="w-5 h-5 mr-2" />
-                      出库列表 ({items.length})
+                      {t('outbound.outboundListTitle')} ({items.length})
                     </CardTitle>
                     {items.length > 0 && (
                       <Button variant="ghost" size="sm" onClick={handleClear}>
                         <Trash2 className="w-4 h-4 mr-1" />
-                        清空
+                        {t('outbound.clearList')}
                       </Button>
                     )}
                   </div>
@@ -224,7 +226,7 @@ export const OutboundPage: React.FC = () => {
                 <CardContent>
                   {items.length === 0 ? (
                     <div className="text-center text-muted-foreground py-8">
-                      暂无待出库货品
+                      {t('outbound.noPendingProducts')}
                     </div>
                   ) : (
                     <div className="space-y-3 max-h-[400px] overflow-auto">
@@ -252,7 +254,7 @@ export const OutboundPage: React.FC = () => {
                                 ))}
                             </div>
                             <div className="pt-1">
-                              <label className="text-xs text-muted-foreground mb-1 block">出库数量</label>
+                              <label className="text-xs text-muted-foreground mb-1 block">{t('outbound.outboundQuantity')}</label>
                               <Input
                                 type="number"
                                 min="1"
@@ -289,10 +291,10 @@ export const OutboundPage: React.FC = () => {
                     {isProcessing ? (
                       <>
                         <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                        处理中...
+                        {t('outbound.processing')}
                       </>
                     ) : (
-                      `提交出库 (${items.length})`
+                      t('outbound.submitOutboundWithCount', { count: items.length })
                     )}
                   </Button>
                 </CardContent>

@@ -7,7 +7,7 @@ import { InboundPage } from './pages/InboundPage';
 import { OutboundPage } from './pages/OutboundPage';
 import { InventoryPage } from './pages/InventoryPage';
 import { SettingsPage } from './pages/SettingsPage';
-import { useConfigStore, useProductStore } from './store';
+import { useConfigStore, useProductStore, useLanguageStore } from './store';
 import { useOutboundStore } from './store/outboundStore';
 import { CloudProviderType } from './api';
 
@@ -15,11 +15,14 @@ function App() {
   const { config, isConfigured, loadConfig } = useConfigStore();
   const { loadProductsFromDB, setCloudProvider } = useProductStore();
   const { setCloudProvider: setOutboundCloudProvider } = useOutboundStore();
+  const { language, setLanguage } = useLanguageStore();
 
   useEffect(() => {
     // Load configuration on app start
     loadConfig();
-  }, [loadConfig]);
+    // Initialize language
+    setLanguage(language);
+  }, [loadConfig, language, setLanguage]);
 
   useEffect(() => {
     // Initialize Provider when config is loaded
