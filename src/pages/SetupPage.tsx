@@ -155,34 +155,6 @@ export const SetupPage: React.FC = () => {
               </p>
             </div>
             
-
-            
-            <div className="pt-4">
-              <h3 className="text-sm font-medium mb-3">{t('setup.fieldConfigTitle')}</h3>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs text-muted-foreground mb-1">{t('setup.statusFieldLabel')}</label>
-                  <Input
-                    name="status_field"
-                    value={formData.status_field}
-                    onChange={handleChange}
-                    placeholder={t('setup.statusFieldPlaceholder')}
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-xs text-muted-foreground mb-1">{t('setup.operatorFieldLabel')}</label>
-                  <Input
-                    name="operator_field"
-                    value={formData.operator_field}
-                    onChange={handleChange}
-                    placeholder={t('setup.operatorFieldPlaceholder')}
-                  />
-                </div>
-              </div>
-            </div>
-            
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? (
                 <>
