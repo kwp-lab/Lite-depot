@@ -190,7 +190,7 @@ export const SetupPage: React.FC = () => {
                   {t('setup.connecting')}
                 </>
               ) : (
-                '{t('setup.startButton')}'
+                <>{t('setup.startButton')}</>
               )}
             </Button>
           </form>

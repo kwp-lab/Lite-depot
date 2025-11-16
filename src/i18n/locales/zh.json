@@ -28,7 +28,8 @@
     "employee": "员工",
     "operator": "操作员",
     "notSet": "未设置",
-    "unknown": "未知"
+    "unknown": "未知",
+    "totalItems": "共 {count} 项"
   },
   "nav": {
     "inbound": "入库",

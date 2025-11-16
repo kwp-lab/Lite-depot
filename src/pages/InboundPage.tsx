@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/Card';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
 import { useConfigStore, useProductStore } from '@/store';
 import { Product } from '@/types';
-import { formatDate } from '@/lib/utils';
+
 import { Loader2, CheckCircle, AlertCircle, Search, LogIn } from 'lucide-react';
 import { ProviderFactory, CloudProviderType } from '../api';
 import { toast } from "sonner"
 
 export const InboundPage: React.FC = () => {
+  const { t } = useTranslation();
   const { config } = useConfigStore();
   const { products, getProductByCode, loadProductsFromDB } = useProductStore();
   
@@ -47,9 +49,9 @@ export const InboundPage: React.FC = () => {
       setMessage(null);
     } else {
       setCurrentProduct(null);
-      setMessage({ type: 'error', text: '找不到该货品，请确认货品资料已同步至本地' });
+      setMessage({ type: 'error', text: t('inbound.productNotFound') });
     }
-  }, [getProductByCode]);
+  }, [getProductByCode, t]);
 
   useEffect(() => {
     // Focus input on mount
@@ -101,7 +103,7 @@ export const InboundPage: React.FC = () => {
       setIsProcessing(true);
 
       if (!provider.isInitialized()) {
-        throw new Error('系统未配置完整，无法进行入库操作');
+        throw new Error(t('inbound.systemNotConfigured'));
       }
 
       const fields: Record<string, string | number | boolean | null | undefined> = {
@@ -115,7 +117,7 @@ export const InboundPage: React.FC = () => {
       console.log('Creating record with fields:', fields);
       await provider.createRecord(fields);
       
-      toast.success("入库成功！")
+      toast.success(t('inbound.inboundSuccess'))
       setCurrentProduct(null);
       setScanCode('');
       setQuantity('1');
@@ -127,7 +129,7 @@ export const InboundPage: React.FC = () => {
       }, 2000);
     } catch (error) {
       console.error('Inbound failed:', error);
-      setMessage({ type: 'error', text: '入库失败：' + (error as Error).message });
+      setMessage({ type: 'error', text: t('inbound.inboundFailed') + (error as Error).message });
     } finally {
       setIsProcessing(false);
     }
@@ -139,14 +141,14 @@ export const InboundPage: React.FC = () => {
       <div className="bg-card border-b border-border p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">货品入库</h1>
+            <h1 className="text-2xl font-bold">{t('inbound.title')}</h1>
             <p className="text-sm text-muted-foreground mt-1">
-              {`已同步货品数: ${products.length}`}
+              {t('inbound.syncedProducts')} {products.length}
             </p>
           </div>
           <div className="text-right">
-            <p className="text-sm text-muted-foreground">操作员</p>
-            <p className="font-medium">{config.employee_name || '未设置'}</p>
+            <p className="text-sm text-muted-foreground">{t('common.operator')}</p>
+            <p className="font-medium">{config.employee_name || t('common.notSet')}</p>
           </div>
         </div>
       </div>
@@ -157,7 +159,7 @@ export const InboundPage: React.FC = () => {
           {/* Scan Input */}
           <Card>
             <CardHeader>
-              <CardTitle>扫码区</CardTitle>
+              <CardTitle>{t('inbound.scanAreaTitle')}</CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleManualScan} className="grid grid-cols-12 gap-2">
@@ -165,13 +167,13 @@ export const InboundPage: React.FC = () => {
                   ref={inputRef}
                   value={scanCode}
                   onChange={(e) => setScanCode(e.target.value)}
-                  placeholder="扫描货品条码或手动输入..."
+                  placeholder={t('inbound.scanPlaceholder')}
                   className="text-lg col-span-10"
                   autoFocus
                 />
                 <Button type="submit" className="col-span-2">
                   <Search className="w-4 h-4 mr-1" />
-                  查询
+                  {t('common.search')}
                 </Button>
               </form>
             </CardContent>
@@ -226,7 +228,7 @@ export const InboundPage: React.FC = () => {
                       min="1"
                       value={quantity}
                       onChange={(e) => setQuantity(e.target.value)}
-                      placeholder="请输入入库数量"
+                      placeholder={t('inbound.quantityPlaceholder')}
                       className="text-lg"
                     />
                   </div>
@@ -240,10 +242,10 @@ export const InboundPage: React.FC = () => {
                     {isProcessing ? (
                       <>
                         <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                        处理中...
+                        {t('inbound.processing')}
                       </>
                     ) : (
-                      '确认入库'
+                      <>{t('inbound.inboundButton')}</>
                     )}
                     <LogIn className="ml-2 h-5 w-5" />
                   </Button>

@@ -28,7 +28,8 @@
     "employee": "Employee",
     "operator": "Operator",
     "notSet": "Not Set",
-    "unknown": "Unknown"
+    "unknown": "Unknown",
+    "totalItems": "Total {count} items"
   },
   "nav": {
     "inbound": "Inbound",
