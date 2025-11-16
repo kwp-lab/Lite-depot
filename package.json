@@ -5,7 +5,7 @@
   "description": "轻量级进出库管理软件 - Lightweight Inventory Management System",
   "private": true,
   "type": "module",
-  "main": "dist-electron/main.js",
+  "main": "dist/main.js",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build && electron-builder",
@@ -73,8 +73,7 @@
       "output": "release"
     },
     "files": [
-      "dist/**/*",
-      "dist-electron/**/*"
+      "dist/**/*"
     ],
     "win": {
       "target": [

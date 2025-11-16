@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './components/theme-provider';
 import { Layout } from './components/Layout';
 import { SetupPage } from './pages/SetupPage';
@@ -36,7 +36,7 @@ function App() {
 
   return (
     <ThemeProvider defaultTheme="system" storageKey="lite-depot-theme">
-      <BrowserRouter>
+      <HashRouter>
         <Routes>
           {isConfigured ? (
             <Route element={<Layout />}>
@@ -56,7 +56,7 @@ function App() {
             </>
           )}
         </Routes>
-      </BrowserRouter>
+      </HashRouter>
     </ThemeProvider>
   );
 }
