@@ -151,7 +151,7 @@ export const InventoryPage: React.FC = () => {
           <div>
             <h1 className="text-2xl font-bold">货品盘点</h1>
             <p className="text-sm text-muted-foreground mt-1">
-              当前时间: {formatDate(new Date())}
+              {`已同步货品数: ${products.length}`}
             </p>
           </div>
           <div className="text-right">

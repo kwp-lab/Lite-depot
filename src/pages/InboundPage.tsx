@@ -11,7 +11,7 @@ import { toast } from "sonner"
 
 export const InboundPage: React.FC = () => {
   const { config } = useConfigStore();
-  const { getProductByCode, loadProductsFromDB } = useProductStore();
+  const { products, getProductByCode, loadProductsFromDB } = useProductStore();
   
   const [scanCode, setScanCode] = useState('');
   const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
@@ -47,7 +47,7 @@ export const InboundPage: React.FC = () => {
       setMessage(null);
     } else {
       setCurrentProduct(null);
-      setMessage({ type: 'error', text: '找不到该货品' });
+      setMessage({ type: 'error', text: '找不到该货品，请确认货品资料已同步至本地' });
     }
   }, [getProductByCode]);
 
@@ -141,7 +141,7 @@ export const InboundPage: React.FC = () => {
           <div>
             <h1 className="text-2xl font-bold">货品入库</h1>
             <p className="text-sm text-muted-foreground mt-1">
-              当前时间: {formatDate(new Date())}
+              {`已同步货品数: ${products.length}`}
             </p>
           </div>
           <div className="text-right">
