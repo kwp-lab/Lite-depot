@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { Product, OutboundItem } from '../types';
-import { ProviderFactory, CloudProviderType } from '../api';
+import { CloudProviderType } from '../api';
 
 interface OutboundState {
   items: OutboundItem[];

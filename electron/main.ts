@@ -48,7 +48,7 @@ function createWindow() {
 }
 
 // IPC handler for logging errors
-ipcMain.handle('log-error', async (event, errorMessage: string) => {
+ipcMain.handle('log-error', async (_event, errorMessage: string) => {
   const logsDir = path.join(app.getPath('userData'), 'logs');
   if (!fs.existsSync(logsDir)) {
     fs.mkdirSync(logsDir, { recursive: true });

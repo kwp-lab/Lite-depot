@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { AppConfig } from '../types';
-import { db, dbHelpers } from '../db';
+import { db } from '../db';
 
 interface ConfigState {
   config: Partial<AppConfig>;

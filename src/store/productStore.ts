@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { Product } from '../types';
-import { db, dbHelpers } from '../db';
+import { db } from '../db';
 import { ProviderFactory, CloudProviderType } from '../api';
 import { AppConfig } from '../types';
 import { BaseProvider } from '../api/base-provider';
