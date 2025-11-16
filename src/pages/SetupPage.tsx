@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/Card';
 import { Input } from '@/components/Input';
@@ -8,6 +9,7 @@ import { ProviderFactory } from '@/api';
 import { Loader2 } from 'lucide-react';
 
 export const SetupPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { saveConfig } = useConfigStore();
   
@@ -41,7 +43,7 @@ export const SetupPage: React.FC = () => {
       
       // Validate required fields
       if (!formData.employee_name || !formData.api_key || !formData.workspace_id || !formData.products_datasheet_id || !formData.transactions_datasheet_id) {
-        alert('请填写所有必填字段');
+        alert(t('setup.fillAllFields'));
         return;
       }
       
@@ -57,7 +59,7 @@ export const SetupPage: React.FC = () => {
       try {
         await provider.getSchema();
       } catch {
-        throw new Error('连接 AITable 失败，请检查 API Key 和 ID 是否正确');
+        throw new Error(t('setup.connectionError'));
       }
       
       // Save configuration
@@ -71,7 +73,7 @@ export const SetupPage: React.FC = () => {
       navigate('/inbound');
     } catch (error) {
       console.error('Setup failed:', error);
-      alert('配置失败：' + (error as Error).message);
+      alert(t('setup.setupFailed') + (error as Error).message);
     } finally {
       setIsLoading(false);
     }
@@ -81,101 +83,101 @@ export const SetupPage: React.FC = () => {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-2xl">
         <CardHeader>
-          <CardTitle className="text-3xl">欢迎使用 LiteDepot</CardTitle>
+          <CardTitle className="text-3xl">{t('setup.title')}</CardTitle>
           <CardDescription>
-            轻量级进出库管理软件 - 请先配置 AITable 连接信息
+            {t('setup.description')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2">员工 *</label>
+              <label className="block text-sm font-medium mb-2">{t('setup.employeeLabel')} {t('common.required')}</label>
               <Input
                 name="employee_name"
                 value={formData.employee_name}
                 onChange={handleChange}
-                placeholder="请输入员工姓名"
+                placeholder={t('setup.employeePlaceholder')}
                 required
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium mb-2">AITable API Key *</label>
+              <label className="block text-sm font-medium mb-2">{t('setup.apiKeyLabel')} {t('common.required')}</label>
               <Input
                 name="api_key"
                 type="password"
                 value={formData.api_key}
                 onChange={handleChange}
-                placeholder="key..."
+                placeholder={t('setup.apiKeyPlaceholder')}
                 required
               />
               <p className="text-xs text-muted-foreground mt-1">
-                在 AITable 个人设置中获取 API Key
+                {t('setup.apiKeyHint')}
               </p>
             </div>
             
             <div>
-              <label className="block text-sm font-medium mb-2">Workspace ID *</label>
+              <label className="block text-sm font-medium mb-2">{t('setup.workspaceLabel')} {t('common.required')}</label>
               <Input
                 name="workspace_id"
                 value={formData.workspace_id}
                 onChange={handleChange}
-                placeholder="spc..."
+                placeholder={t('setup.workspacePlaceholder')}
                 required
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium mb-2">货品表 Datasheet ID (Products) *</label>
+              <label className="block text-sm font-medium mb-2">{t('setup.productsDatasheetLabel')} {t('common.required')}</label>
               <Input
                 name="products_datasheet_id"
                 value={formData.products_datasheet_id}
                 onChange={handleChange}
-                placeholder="dst..."
+                placeholder={t('setup.productsDatasheetPlaceholder')}
                 required
               />
               <p className="text-xs text-muted-foreground mt-1">
-                包含字段：SKU, Product Name, Category, Unit
+                {t('setup.productsDatasheetHint')}
               </p>
             </div>
             
             <div>
-              <label className="block text-sm font-medium mb-2">库存流水表 Datasheet ID (StockTransactions) *</label>
+              <label className="block text-sm font-medium mb-2">{t('setup.transactionsDatasheetLabel')} {t('common.required')}</label>
               <Input
                 name="transactions_datasheet_id"
                 value={formData.transactions_datasheet_id}
                 onChange={handleChange}
-                placeholder="dst..."
+                placeholder={t('setup.productsDatasheetPlaceholder')}
                 required
               />
               <p className="text-xs text-muted-foreground mt-1">
-                包含字段：ID, SKU, Type (in/out), Quantity, EmployeeID, Date
+                {t('setup.transactionsDatasheetHint')}
               </p>
             </div>
             
 
             
             <div className="pt-4">
-              <h3 className="text-sm font-medium mb-3">字段配置（可选，使用默认值）</h3>
+              <h3 className="text-sm font-medium mb-3">{t('setup.fieldConfigTitle')}</h3>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs text-muted-foreground mb-1">状态字段名</label>
+                  <label className="block text-xs text-muted-foreground mb-1">{t('setup.statusFieldLabel')}</label>
                   <Input
                     name="status_field"
                     value={formData.status_field}
                     onChange={handleChange}
-                    placeholder="status"
+                    placeholder={t('setup.statusFieldPlaceholder')}
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-xs text-muted-foreground mb-1">借用人字段名</label>
+                  <label className="block text-xs text-muted-foreground mb-1">{t('setup.operatorFieldLabel')}</label>
                   <Input
                     name="operator_field"
                     value={formData.operator_field}
                     onChange={handleChange}
-                    placeholder="borrower"
+                    placeholder={t('setup.operatorFieldPlaceholder')}
                   />
                 </div>
               </div>
@@ -185,10 +187,10 @@ export const SetupPage: React.FC = () => {
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  连接中...
+                  {t('setup.connecting')}
                 </>
               ) : (
-                '开始使用'
+                '{t('setup.startButton')}'
               )}
             </Button>
           </form>

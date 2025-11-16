@@ -266,7 +266,7 @@ export const SettingsPage: React.FC = () => {
                 name="sku_field"
                 value={formData.sku_field}
                 onChange={handleChange}
-                placeholder="the field name for SKU or Product ID"
+                placeholder={t('settings.skuFieldPlaceholder')}
               />
             </div>
 
@@ -277,14 +277,14 @@ export const SettingsPage: React.FC = () => {
                   <TooltipTrigger>
                     <Info className="inline-block ml-1 h-4 w-4 text-muted-foreground" />
                   </TooltipTrigger>
-                  <TooltipContent>操作类型，表示入库或出库</TooltipContent>
+                  <TooltipContent>{t('settings.typeFieldTooltip')}</TooltipContent>
                 </Tooltip>
               </label>
               <Input
                 name="type_field"
                 value={formData.type_field}
                 onChange={handleChange}
-                placeholder="the field name for transaction type (in/out)"
+                placeholder={t('settings.typeFieldPlaceholder')}
               />
             </div>
 
@@ -295,14 +295,14 @@ export const SettingsPage: React.FC = () => {
                   <TooltipTrigger>
                     <Info className="inline-block ml-1 h-4 w-4 text-muted-foreground" />
                   </TooltipTrigger>
-                  <TooltipContent>进库或出库的数量</TooltipContent>
+                  <TooltipContent>{t('settings.quantityFieldTooltip')}</TooltipContent>
                 </Tooltip>
               </label>
               <Input
                 name="quantity_field"
                 value={formData.quantity_field}
                 onChange={handleChange}
-                placeholder="the field name for quantity"
+                placeholder={t('settings.quantityFieldPlaceholder')}
               />
             </div>
 
@@ -313,32 +313,32 @@ export const SettingsPage: React.FC = () => {
                   <TooltipTrigger>
                     <Info className="inline-block ml-1 h-4 w-4 text-muted-foreground" />
                   </TooltipTrigger>
-                  <TooltipContent>登记入库或出库的操作人</TooltipContent>
+                  <TooltipContent>{t('settings.operatorFieldTooltip')}</TooltipContent>
                 </Tooltip>
               </label>
               <Input
                 name="operator_field"
                 value={formData.operator_field}
                 onChange={handleChange}
-                placeholder="the field name for operator"
+                placeholder={t('settings.operatorFieldPlaceholder')}
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-2">
-                时间字段
+                {t('settings.timeFieldLabel')}
                 <Tooltip>
                   <TooltipTrigger>
                     <Info className="inline-block ml-1 h-4 w-4 text-muted-foreground" />
                   </TooltipTrigger>
-                  <TooltipContent>登记入库或出库的操作时间</TooltipContent>
+                  <TooltipContent>{t('settings.timeFieldTooltip')}</TooltipContent>
                 </Tooltip>
               </label>
               <Input
                 name="time_field"
                 value={formData.time_field}
                 onChange={handleChange}
-                placeholder="inbound_time"
+                placeholder={t('settings.timeFieldPlaceholder')}
               />
             </div>
             
@@ -421,13 +421,13 @@ export const SettingsPage: React.FC = () => {
       {/* Data Management */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle>数据管理</CardTitle>
-          <CardDescription>同步和清除本地数据</CardDescription>
+          <CardTitle>{t('settings.dataManagementTitle')}</CardTitle>
+          <CardDescription>{t('settings.dataManagementDescription')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {lastSyncTime && (
             <div className="text-sm text-muted-foreground">
-              上次同步: {new Date(lastSyncTime).toLocaleString('zh-CN')}
+              {t('settings.lastSync')} {new Date(lastSyncTime).toLocaleString(language === 'zh' ? 'zh-CN' : 'en-US')}
             </div>
           )}
 
@@ -436,12 +436,12 @@ export const SettingsPage: React.FC = () => {
               {isSyncing ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  同步中...
+                  {t('common.syncing')}
                 </>
               ) : (
                 <>
                   <RefreshCw className="mr-2 h-4 w-4" />
-                  同步货品列表
+                  {t('settings.syncProducts')}
                 </>
               )}
             </Button>
@@ -450,12 +450,12 @@ export const SettingsPage: React.FC = () => {
               {isClearing ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  清除中...
+                  {t('settings.clearing')}
                 </>
               ) : (
                 <>
                   <Trash2 className="mr-2 h-4 w-4" />
-                  清除本地货品缓存
+                  {t('settings.clearCache')}
                 </>
               )}
             </Button>
@@ -466,19 +466,19 @@ export const SettingsPage: React.FC = () => {
       {/* Actions */}
       <div className="flex justify-between">
         <Button variant="destructive" onClick={handleClearConfig}>
-          清除所有配置
+          {t('settings.clearAllConfig')}
         </Button>
 
         <Button onClick={handleSave} disabled={isSaving}>
           {isSaving ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              保存中...
+              {t('common.saving')}
             </>
           ) : (
             <>
               <Save className="mr-2 h-4 w-4" />
-              保存配置
+              {t('settings.saveConfig')}
             </>
           )}
         </Button>
