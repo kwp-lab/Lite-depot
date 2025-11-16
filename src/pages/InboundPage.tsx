@@ -258,7 +258,7 @@ export const InboundPage: React.FC = () => {
           {!currentProduct && !message && (
             <Card className="bg-muted">
               <CardContent className="p-6 text-center text-muted-foreground">
-                <p>请使用扫码枪扫描货品条码，或手动输入货品编号后点击查询</p>
+                <p>{t('inbound.scanTips')}</p>
               </CardContent>
             </Card>
           )}

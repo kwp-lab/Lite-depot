@@ -145,7 +145,8 @@
     "processing": "处理中...",
     "systemNotConfigured": "系统未配置完整，无法进行入库操作",
     "inboundSuccess": "入库成功！",
-    "inboundFailed": "入库失败："
+    "inboundFailed": "入库失败：",
+    "scanTips": "提示：请使用扫码枪扫描货品条码，或手动输入货品编号后点击查询"
   },
   "outbound": {
     "title": "货品出库",
@@ -157,17 +158,23 @@
     "addSuccess": "添加成功",
     "outboundListTitle": "出库清单",
     "noProducts": "暂无货品",
+    "noPendingProducts": "暂无待出库货品",
     "totalItems": "共 {count} 项",
     "productId": "货品 ID",
     "productName": "货品名称",
     "quantity": "数量",
+    "outboundQuantity": "出库数量",
     "actions": "操作",
     "remove": "移除",
     "submitOutbound": "批量出库",
+    "submitOutboundWithCount": "提交出库 ({count})",
     "clearList": "清空列表",
     "confirmClearList": "确定要清空出库列表吗？",
     "outboundSuccess": "出库成功！",
-    "outboundFailed": "出库失败："
+    "outboundFailed": "出库失败：",
+    "scanTips": "扫描货品条码将其添加到右侧出库列表",
+    "batchScanSupport": "支持批量扫码",
+    "processing": "处理中..."
   },
   "inventory": {
     "title": "货品盘点",
@@ -183,11 +190,14 @@
     "inventoryFailed": "盘点失败：",
     "statsTitle": "盘点统计",
     "scanned": "已盘点",
-    "totalProducts": "货品总数",
+    "totalProducts": "总货品数",
     "recentScansTitle": "最近盘点",
+    "todayScanned": "今日已盘点",
     "noRecentScans": "暂无盘点记录",
     "unscannedTitle": "未盘点货品",
     "unscannedCount": "未盘点: {count}",
+    "allCompleted": "所有货品已盘点完成！",
+    "backButton": "返回",
     "confirmReset": "确定要重置盘点状态吗？"
   }
 }

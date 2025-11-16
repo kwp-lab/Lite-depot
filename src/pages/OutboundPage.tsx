@@ -200,8 +200,8 @@ export const OutboundPage: React.FC = () => {
 
               <Card className="bg-muted">
                 <CardContent className="p-6 text-center text-muted-foreground">
-                  <p>扫描货品条码将其添加到右侧出库列表</p>
-                  <p className="text-sm mt-2">支持批量扫码</p>
+                  <p>{t('outbound.scanTips')}</p>
+                  <p className="text-sm mt-2">{t('outbound.batchScanSupport')}</p>
                 </CardContent>
               </Card>
             </div>
@@ -226,7 +226,7 @@ export const OutboundPage: React.FC = () => {
                 <CardContent>
                   {items.length === 0 ? (
                     <div className="text-center text-muted-foreground py-8">
-                      暂无待出库货品
+                      {t('outbound.noPendingProducts')}
                     </div>
                   ) : (
                     <div className="space-y-3 max-h-[400px] overflow-auto">
@@ -254,7 +254,7 @@ export const OutboundPage: React.FC = () => {
                                 ))}
                             </div>
                             <div className="pt-1">
-                              <label className="text-xs text-muted-foreground mb-1 block">出库数量</label>
+                              <label className="text-xs text-muted-foreground mb-1 block">{t('outbound.outboundQuantity')}</label>
                               <Input
                                 type="number"
                                 min="1"
@@ -291,10 +291,10 @@ export const OutboundPage: React.FC = () => {
                     {isProcessing ? (
                       <>
                         <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                        处理中...
+                        {t('outbound.processing')}
                       </>
                     ) : (
-                      `提交出库 (${items.length})`
+                      t('outbound.submitOutboundWithCount', { count: items.length })
                     )}
                   </Button>
                 </CardContent>

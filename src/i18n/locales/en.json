@@ -145,7 +145,8 @@
     "processing": "Processing...",
     "systemNotConfigured": "System not fully configured, cannot perform inbound operation",
     "inboundSuccess": "Inbound successful!",
-    "inboundFailed": "Inbound failed: "
+    "inboundFailed": "Inbound failed: ",
+    "scanTips": "Tip: Please use a barcode scanner to scan the product barcode, or manually enter the product ID and click search"
   },
   "outbound": {
     "title": "Product Outbound",
@@ -157,17 +158,23 @@
     "addSuccess": "Added successfully",
     "outboundListTitle": "Outbound List",
     "noProducts": "No products",
+    "noPendingProducts": "No pending outbound products",
     "totalItems": "Total {count} items",
     "productId": "Product ID",
     "productName": "Product Name",
     "quantity": "Quantity",
+    "outboundQuantity": "Outbound Quantity",
     "actions": "Actions",
     "remove": "Remove",
     "submitOutbound": "Batch Outbound",
+    "submitOutboundWithCount": "Submit Outbound ({count})",
     "clearList": "Clear List",
     "confirmClearList": "Are you sure you want to clear the outbound list?",
     "outboundSuccess": "Outbound successful!",
-    "outboundFailed": "Outbound failed: "
+    "outboundFailed": "Outbound failed: ",
+    "scanTips": "Scan product barcode to add to outbound list on the right",
+    "batchScanSupport": "Batch scanning supported",
+    "processing": "Processing..."
   },
   "inventory": {
     "title": "Product Inventory",
@@ -185,9 +192,12 @@
     "scanned": "Checked",
     "totalProducts": "Total Products",
     "recentScansTitle": "Recent Scans",
+    "todayScanned": "Checked Today",
     "noRecentScans": "No recent scans",
     "unscannedTitle": "Unchecked Products",
     "unscannedCount": "Unchecked: {count}",
+    "allCompleted": "All products have been checked!",
+    "backButton": "Back",
     "confirmReset": "Are you sure you want to reset inventory status?"
   }
 }

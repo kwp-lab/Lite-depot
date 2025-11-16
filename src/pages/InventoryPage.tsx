@@ -233,7 +233,7 @@ export const InventoryPage: React.FC = () => {
               {/* Stats */}
               <Card>
                 <CardHeader>
-                  <CardTitle>{t('inventory.inventoryButton')}统计</CardTitle>
+                  <CardTitle>{t('inventory.statsTitle')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 gap-4">
@@ -242,7 +242,7 @@ export const InventoryPage: React.FC = () => {
                         {scannedToday.size}
                       </div>
                       <div className="text-sm text-muted-foreground mt-1">
-                        已{t('inventory.inventoryButton')}
+                        {t('inventory.scanned')}
                       </div>
                     </div>
                     <div className="text-center p-4 bg-muted rounded-md">
@@ -250,7 +250,7 @@ export const InventoryPage: React.FC = () => {
                         {products.length}
                       </div>
                       <div className="text-sm text-muted-foreground mt-1">
-                        总货品数
+                        {t('inventory.totalProducts')}
                       </div>
                     </div>
                   </div>
@@ -263,12 +263,12 @@ export const InventoryPage: React.FC = () => {
               {!showUnscanned ? (
                 <Card>
                   <CardHeader>
-                    <CardTitle>今日已{t('inventory.inventoryButton')} ({scannedList.length})</CardTitle>
+                    <CardTitle>{t('inventory.todayScanned')} ({scannedList.length})</CardTitle>
                   </CardHeader>
                   <CardContent>
                     {scannedList.length === 0 ? (
                       <div className="text-center text-muted-foreground py-8">
-                        暂无{t('inventory.inventoryButton')}记录
+                        {t('inventory.noRecentScans')}
                       </div>
                     ) : (
                       <div className="space-y-2 max-h-[600px] overflow-auto">
@@ -296,10 +296,10 @@ export const InventoryPage: React.FC = () => {
                     <div className="flex items-center justify-between">
                       <CardTitle className="flex items-center">
                         <FileText className="w-5 h-5 mr-2" />
-                        未{t('inventory.inventoryButton')}货品 ({unscannedProducts.length})
+                        {t('inventory.unscannedTitle')} ({unscannedProducts.length})
                       </CardTitle>
                       <Button variant="ghost" size="sm" onClick={() => setShowUnscanned(false)}>
-                        返回
+                        {t('inventory.backButton')}
                       </Button>
                     </div>
                   </CardHeader>
@@ -307,7 +307,7 @@ export const InventoryPage: React.FC = () => {
                     {unscannedProducts.length === 0 ? (
                       <div className="text-center text-green-600 py-8">
                         <CheckCircle className="w-12 h-12 mx-auto mb-2" />
-                        <p className="font-medium">所有货品已{t('inventory.inventoryButton')}完成！</p>
+                        <p className="font-medium">{t('inventory.allCompleted')}</p>
                       </div>
                     ) : (
                       <div className="space-y-2 max-h-[600px] overflow-auto">

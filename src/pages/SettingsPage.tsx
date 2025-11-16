@@ -255,13 +255,13 @@ export const SettingsPage: React.FC = () => {
       {/* Field Mapping */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle>字段映射</CardTitle>
-          <CardDescription>配置 AITable 表中的字段名称</CardDescription>
+          <CardTitle>{t('settings.fieldMappingTitle')}</CardTitle>
+          <CardDescription>{t('settings.fieldMappingDescription')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">“SKU/Product ID” 字段</label>
+              <label className="block text-sm font-medium mb-2">{t('settings.skuFieldLabel')}</label>
               <Input
                 name="sku_field"
                 value={formData.sku_field}
@@ -272,7 +272,7 @@ export const SettingsPage: React.FC = () => {
 
             <div>
               <label className="block text-sm font-medium mb-2">
-                “操作类型” 字段
+                {t('settings.typeFieldLabel')}
                 <Tooltip>
                   <TooltipTrigger>
                     <Info className="inline-block ml-1 h-4 w-4 text-muted-foreground" />
@@ -290,7 +290,7 @@ export const SettingsPage: React.FC = () => {
 
             <div>
               <label className="block text-sm font-medium mb-2">
-                “数量” 字段
+                {t('settings.quantityFieldLabel')}
                 <Tooltip>
                   <TooltipTrigger>
                     <Info className="inline-block ml-1 h-4 w-4 text-muted-foreground" />
@@ -308,7 +308,7 @@ export const SettingsPage: React.FC = () => {
 
             <div>
               <label className="block text-sm font-medium mb-2">
-                “操作人” 字段
+                {t('settings.operatorFieldLabel')}
                 <Tooltip>
                   <TooltipTrigger>
                     <Info className="inline-block ml-1 h-4 w-4 text-muted-foreground" />
