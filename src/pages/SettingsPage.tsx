@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/Card';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
@@ -16,16 +17,18 @@ import {
   TooltipContent,
   TooltipProvider
 } from '@/components/ui/tooltip';
-import { useConfigStore, useProductStore } from '@/store';
+import { useConfigStore, useProductStore, useLanguageStore } from '@/store';
 import { useTheme } from '@/components/theme-provider';
 import { ProviderFactory } from '@/api';
 import { Loader2, Save, Trash2, RefreshCw, Monitor, Moon, Sun, Info } from 'lucide-react';
 
 export const SettingsPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { config, saveConfig, clearConfig } = useConfigStore();
   const { syncFromRemote, lastSyncTime, clearProducts } = useProductStore();
   const { theme, setTheme } = useTheme();
+  const { language, setLanguage } = useLanguageStore();
 
   const [formData, setFormData] = useState({
     cloud_provider: 'aitable',
@@ -72,7 +75,7 @@ export const SettingsPage: React.FC = () => {
 
       // Validate required fields
       if (!formData.employee_name || !formData.api_key || !formData.workspace_id || !formData.products_datasheet_id || !formData.transactions_datasheet_id) {
-        alert('请填写所有必填字段');
+        alert(t('settings.fillAllRequiredFields'));
         return;
       }
 
@@ -86,7 +89,7 @@ export const SettingsPage: React.FC = () => {
         datasheetId: formData.products_datasheet_id,
       });
 
-      alert('配置保存成功！');
+      alert(t('settings.configSaved'));
 
       // If this is initial setup, redirect to inbound page
       if (!config.api_key) {
@@ -94,7 +97,7 @@ export const SettingsPage: React.FC = () => {
       }
     } catch (error) {
       console.error('Failed to save config:', error);
-      alert('保存配置失败：' + (error as Error).message);
+      alert(t('settings.saveConfigFailed') + (error as Error).message);
     } finally {
       setIsSaving(false);
     }
@@ -112,34 +115,34 @@ export const SettingsPage: React.FC = () => {
       });
 
       await syncFromRemote();
-      alert('同步成功！');
+      alert(t('settings.syncSuccess'));
     } catch (error) {
       console.error('Failed to sync:', error);
-      alert('同步失败：' + (error as Error).message);
+      alert(t('settings.syncFailed') + (error as Error).message);
     } finally {
       setIsSyncing(false);
     }
   };
 
   const handleClearCache = async () => {
-    if (!confirm('确定要清除本地缓存吗？这将删除所有本地货品数据。')) {
+    if (!confirm(t('settings.confirmClearCache'))) {
       return;
     }
 
     try {
       setIsClearing(true);
       await clearProducts();
-      alert('缓存已清除');
+      alert(t('settings.cacheCleared'));
     } catch (error) {
       console.error('Failed to clear cache:', error);
-      alert('清除缓存失败：' + (error as Error).message);
+      alert(t('settings.clearCacheFailed') + (error as Error).message);
     } finally {
       setIsClearing(false);
     }
   };
 
   const handleClearConfig = async () => {
-    if (!confirm('确定要清除所有配置吗？这将退出登录。')) {
+    if (!confirm(t('settings.confirmClearConfig'))) {
       return;
     }
 
@@ -150,20 +153,20 @@ export const SettingsPage: React.FC = () => {
   return (
     <TooltipProvider>
     <div className="p-8 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6">系统设置</h1>
+      <h1 className="text-3xl font-bold mb-6">{t('settings.title')}</h1>
 
       {/* Basic Configuration */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle>基本配置</CardTitle>
-          <CardDescription>配置云服务 API 连接信息</CardDescription>
+          <CardTitle>{t('settings.basicConfigTitle')}</CardTitle>
+          <CardDescription>{t('settings.basicConfigDescription')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2">云服务 *</label>
+            <label className="block text-sm font-medium mb-2">{t('settings.cloudProviderLabel')} {t('common.required')}</label>
             <Select value={formData.cloud_provider} onValueChange={handleProviderChange}>
               <SelectTrigger className="h-auto min-h-[2.5rem] py-2">
-                <SelectValue placeholder="选择云服务提供者">
+                <SelectValue placeholder={t('settings.cloudProviderPlaceholder')}>
                   {formData.cloud_provider && (() => {
                     const selectedProvider = ProviderFactory.getAvailableProviders().find(
                       p => p.value === formData.cloud_provider
@@ -191,59 +194,59 @@ export const SettingsPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">员工 *</label>
+            <label className="block text-sm font-medium mb-2">{t('settings.employeeLabel')} {t('common.required')}</label>
             <Input
               name="employee_name"
               value={formData.employee_name}
               onChange={handleChange}
-              placeholder="请输入员工姓名"
+              placeholder={t('settings.employeePlaceholder')}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">API Key *</label>
+            <label className="block text-sm font-medium mb-2">{t('settings.apiKeyLabel')} {t('common.required')}</label>
             <Input
               name="api_key"
               type="password"
               value={formData.api_key}
               onChange={handleChange}
-              placeholder="请输入你的云服务 API Key"
+              placeholder={t('settings.apiKeyPlaceholder')}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Workspace ID *</label>
+            <label className="block text-sm font-medium mb-2">{t('settings.workspaceLabel')} {t('common.required')}</label>
             <Input
               name="workspace_id"
               value={formData.workspace_id}
               onChange={handleChange}
-              placeholder="spc..."
+              placeholder={t('settings.workspacePlaceholder')}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">货品表 Datasheet ID (Products) *</label>
+            <label className="block text-sm font-medium mb-2">{t('settings.productsDatasheetLabel')} {t('common.required')}</label>
             <p className="text-xs text-muted-foreground mt-1">
-              包含字段：SKU, Product Name, Category, Unit
+              {t('settings.productsDatasheetHint')}
             </p>
             <Input
               name="products_datasheet_id"
               value={formData.products_datasheet_id}
               onChange={handleChange}
-              placeholder="dst..."
+              placeholder={t('settings.productsDatasheetPlaceholder')}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">库存流水表 Datasheet ID (StockTransactions) *</label>
+            <label className="block text-sm font-medium mb-2">{t('settings.transactionsDatasheetLabel')} {t('common.required')}</label>
             <p className="text-xs text-muted-foreground mt-1">
-              包含字段：ID, SKU, Type (in/out), Quantity, EmployeeID, Date
+              {t('settings.transactionsDatasheetHint')}
             </p>
             <Input
               name="transactions_datasheet_id"
               value={formData.transactions_datasheet_id}
               onChange={handleChange}
-              placeholder="dst..."
+              placeholder={t('settings.transactionsDatasheetPlaceholder')}
             />
           </div>
         </CardContent>
@@ -346,12 +349,12 @@ export const SettingsPage: React.FC = () => {
       {/* Theme Configuration */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle>主题设置</CardTitle>
-          <CardDescription>选择应用程序的主题外观</CardDescription>
+          <CardTitle>{t('settings.themeTitle')}</CardTitle>
+          <CardDescription>{t('settings.themeDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div>
-            <label className="block text-sm font-medium mb-2">主题模式</label>
+            <label className="block text-sm font-medium mb-2">{t('settings.themeModeLabel')}</label>
             <div className="grid grid-cols-3 gap-4">
               <button
                 type="button"
@@ -362,7 +365,7 @@ export const SettingsPage: React.FC = () => {
                   }`}
               >
                 <Sun className="h-6 w-6" />
-                <span className="text-sm font-medium">浅色模式</span>
+                <span className="text-sm font-medium">{t('settings.lightMode')}</span>
               </button>
 
               <button
@@ -374,7 +377,7 @@ export const SettingsPage: React.FC = () => {
                   }`}
               >
                 <Moon className="h-6 w-6" />
-                <span className="text-sm font-medium">深色模式</span>
+                <span className="text-sm font-medium">{t('settings.darkMode')}</span>
               </button>
 
               <button
@@ -386,9 +389,31 @@ export const SettingsPage: React.FC = () => {
                   }`}
               >
                 <Monitor className="h-6 w-6" />
-                <span className="text-sm font-medium">跟随系统</span>
+                <span className="text-sm font-medium">{t('settings.systemMode')}</span>
               </button>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Language Configuration */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>{t('settings.languageTitle')}</CardTitle>
+          <CardDescription>{t('settings.languageDescription')}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div>
+            <label className="block text-sm font-medium mb-2">{t('settings.languageLabel')}</label>
+            <Select value={language} onValueChange={setLanguage}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="zh">{t('settings.languageChinese')}</SelectItem>
+                <SelectItem value="en">{t('settings.languageEnglish')}</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
