@@ -55,7 +55,7 @@ export class ProviderFactory {
       {
         value: 'aitable',
         label: 'AITable',
-        description: '维格表 - 强大的在线多维表格',
+        description: 'Streamline workflows with a visual database',
       },
       // 未来可以添加更多提供者
       // {

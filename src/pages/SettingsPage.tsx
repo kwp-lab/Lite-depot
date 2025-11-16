@@ -162,8 +162,20 @@ export const SettingsPage: React.FC = () => {
           <div>
             <label className="block text-sm font-medium mb-2">云服务 *</label>
             <Select value={formData.cloud_provider} onValueChange={handleProviderChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="选择云服务提供者" />
+              <SelectTrigger className="h-auto min-h-[2.5rem] py-2">
+                <SelectValue placeholder="选择云服务提供者">
+                  {formData.cloud_provider && (() => {
+                    const selectedProvider = ProviderFactory.getAvailableProviders().find(
+                      p => p.value === formData.cloud_provider
+                    );
+                    return selectedProvider ? (
+                      <div className="flex flex-col items-start">
+                        <span>{selectedProvider.label}</span>
+                        <span className="text-xs text-muted-foreground">{selectedProvider.description}</span>
+                      </div>
+                    ) : null;
+                  })()}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {ProviderFactory.getAvailableProviders().map((provider) => (
