@@ -2,7 +2,10 @@
 export { BaseProvider } from './base-provider';
 
 // 导出 AITable Provider（新接口）
-export { AITableProvider } from './aitables';
+export { AITableProvider } from './aitable';
+
+// 导出 Vika Provider
+export { VikaProvider } from './vika';
 
 // 导出 Provider 工厂
 export { ProviderFactory, type CloudProviderType } from './provider-factory';

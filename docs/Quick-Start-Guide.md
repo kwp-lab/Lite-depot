@@ -9,6 +9,18 @@
 - **数据库名称**: `inventory_client_db`
 - **表**: `products` (货品列表), `system_config` (系统配置)
 
+### 交易记录模式
+
+- **货品表（products）**: 存储货品基础信息，仅用于扫码查找，不存储库存状态
+- **交易表（transactions）**: 存储在云端，记录所有入库/出库操作
+- **入库/出库**: 创建交易记录（Type: 'in'/'out'），而非修改货品状态
+
+### UI 提示
+
+- 使用 **sonner** 库的 `toast` 进行消息提示
+- 成功：`toast.success('操作成功')`
+- 错误：`toast.error('操作失败')`
+
 ### Store 模块
 
 - **configStore**: 系统配置管理
@@ -212,34 +224,56 @@ function OutboundPage() {
 
 ```typescript
 import { useOutboundStore, useConfigStore } from '@/store';
+import { ProviderFactory, CloudProviderType } from '@/api';
+import { toast } from 'sonner';
 
 function OutboundSubmit() {
-  const { items, borrowerName, setBorrowerName, submit } = useOutboundStore();
+  const { items, updateQuantity, clear } = useOutboundStore();
   const { config } = useConfigStore();
+  const [isProcessing, setIsProcessing] = useState(false);
   
   const handleSubmit = async () => {
     try {
-      await submit(
-        config.employee_id!,
-        config.status_field!,
-        config.borrower_field!,
-        config.outbound_time_field!
-      );
-      alert('出库成功！');
+      setIsProcessing(true);
+      
+      const provider = ProviderFactory.getProvider(config.cloud_provider as CloudProviderType);
+      const outboundTime = new Date().toISOString();
+      
+      // 构建批量创建记录
+      const records = items.map(item => ({
+        fields: {
+          [config.sku_field || 'SKU']: item.product.product_id,
+          [config.type_field || 'Type']: 'out',
+          [config.quantity_field || 'Quantity']: item.quantity + '',
+          [config.time_field || 'Date']: outboundTime,
+          [config.operator_field || 'Employee']: config.employee_name || '未知',
+        },
+      }));
+      
+      await provider.batchCreate(records);
+      clear();
+      toast.success('出库成功！');
     } catch (error) {
-      alert('出库失败: ' + error.message);
+      console.error('出库失败:', error);
+      toast.error('出库失败: ' + (error as Error).message);
+    } finally {
+      setIsProcessing(false);
     }
   };
   
   return (
     <div>
-      <input
-        type="text"
-        placeholder="借用人姓名"
-        value={borrowerName}
-        onChange={(e) => setBorrowerName(e.target.value)}
-      />
-      <button onClick={handleSubmit} disabled={items.length === 0}>
+      {items.map(item => (
+        <div key={item.product.id}>
+          {item.product.product_id}
+          <input
+            type="number"
+            value={item.quantity}
+            onChange={(e) => updateQuantity(item.product.id, parseInt(e.target.value) || 1)}
+          />
+        </div>
+      ))}
+      <button onClick={handleSubmit} disabled={items.length === 0 || isProcessing}>
         提交出库 ({items.length})
       </button>
     </div>
@@ -324,22 +358,31 @@ const product = getProductByCode('DEVICE001'); // 从本地 IndexedDB 查询
 ### 场景 4: 扫码入库
 
 ```typescript
-const handleScan = async (code: string) => {
+import { ProviderFactory, CloudProviderType } from '@/api';
+import { toast } from 'sonner';
+
+const handleInbound = async (code: string, quantity: string) => {
   // 1. 查找货品
   const product = getProductByCode(code);
   
   if (!product) {
-    alert('未找到货品');
+    toast.error('未找到货品');
     return;
   }
   
-  // 2. 更新货品状态
-  await updateProduct(product.id, {
-    [config.status_field!]: '在库',
-    [config.inbound_time_field!]: new Date().toISOString(),
-  });
+  // 2. 创建入库交易记录
+  const provider = ProviderFactory.getProvider(config.cloud_provider as CloudProviderType);
   
-  alert('入库成功');
+  const fields = {
+    [config.sku_field || 'SKU']: product.product_id,
+    [config.type_field || 'Type']: 'in',
+    [config.quantity_field || 'Quantity']: quantity,
+    [config.operator_field || 'Employee']: config.employee_name || '未知',
+    [config.time_field || 'Date']: new Date().toISOString(),
+  };
+  
+  await provider.createRecord(fields);
+  toast.success('入库成功');
 };
 ```
 

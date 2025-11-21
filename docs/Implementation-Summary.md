@@ -4,6 +4,15 @@
 
 已根据 **Technical Specification 第 5 章** 完成 IndexedDB 数据存储的完整实现，并满足所有补充要求。
 
+## 🎯 核心架构设计
+
+**交易记录模式**：
+- ✅ 货品表（products）：存储货品基础信息，用于扫码查找
+- ✅ 交易表（transactions）：记录所有入库/出库操作
+- ✅ 入库/出库操作创建交易记录，而非修改货品状态
+- ✅ 每条交易包含：SKU、Type（in/out）、Quantity、Employee、Date
+- ✅ 便于追溯历史、审计和统计分析
+
 ## 📋 实现清单
 
 ### ✅ 1. 数据库 Schema（`src/db/index.ts`）
@@ -30,15 +39,16 @@
 - [x] `loadProductsFromDB()` - 从本地加载货品
 - [x] `syncFromRemote()` - 从云端同步（以远端为准）
 - [x] `getProductByCode()` - 扫码查找货品
-- [x] `updateProduct()` - 更新货品信息
 - [x] `clearProducts()` - 清空货品缓存
+- [x] 货品数据仅用于查找，不存储库存状态
 
 ### ✅ 4. 出库篮存储（`src/store/outboundStore.ts`）
 
 - [x] `addProduct()` - 添加货品到出库篮
 - [x] `removeProduct()` - 移除货品
-- [x] `submit()` - 批量提交出库
+- [x] `updateQuantity()` - 更新货品出库数量
 - [x] `clear()` - 清空出库篮
+- [x] 批量创建交易记录（通过 Provider 的 `batchCreate`）
 
 ### ✅ 5. 盘点状态存储（`src/store/inventoryStore.ts`）
 

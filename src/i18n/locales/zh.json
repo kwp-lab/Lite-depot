@@ -40,12 +40,14 @@
   },
   "setup": {
     "title": "欢迎使用 LiteDepot",
-    "description": "轻量级进出库管理软件 - 请先配置 AITable 连接信息",
+    "description": "轻量级进出库管理软件 - 请先配置云服务连接信息",
+    "cloudProviderLabel": "云服务",
+    "cloudProviderPlaceholder": "选择云服务提供者",
     "employeeLabel": "员工",
     "employeePlaceholder": "请输入员工姓名",
-    "apiKeyLabel": "AITable API Key",
+    "apiKeyLabel": "API Key",
     "apiKeyPlaceholder": "key...",
-    "apiKeyHint": "在 AITable 个人设置中获取 API Key",
+    "apiKeyHint": "在云服务平台的个人设置中获取 API Key",
     "workspaceLabel": "Workspace ID",
     "workspacePlaceholder": "spc...",
     "productsDatasheetLabel": "货品表 Datasheet ID (Products)",
@@ -57,7 +59,7 @@
     "startButton": "开始使用",
     "connecting": "连接中...",
     "fillAllFields": "请填写所有必填字段",
-    "connectionError": "连接 AITable 失败，请检查 API Key 和 ID 是否正确",
+    "connectionError": "连接云服务失败，请检查 API Key 和 ID 是否正确",
     "setupFailed": "配置失败："
   },
   "settings": {

@@ -29,8 +29,7 @@ LiteDepot is a desktop demo application targeting warehouse inbound/outbound reg
 ### 📤 Outbound Flow (Batch Supported)
 1. Click left navigation "Outbound"
 2. Scan multiple products to add them to the outbound basket
-3. Enter borrower name
-4. Click "Submit Outbound" to process all items together
+3. Click "Submit Outbound" to process all items together
 
 ### 📋 Inventory Flow (Todo)
 1. Click left navigation "Inventory"
@@ -113,7 +112,7 @@ Artifacts are generated in `release/`.
 ```
 src/
 ├── api/                  # API layer
-│   ├── aitables.ts       # AITable implementation
+│   ├── aitable.ts       # AITable implementation
 │   ├── base-provider.ts  # Provider base class
 │   └── provider-factory.ts # Provider factory
 ├── components/           # UI components
