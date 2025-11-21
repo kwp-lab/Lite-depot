@@ -40,12 +40,14 @@
   },
   "setup": {
     "title": "Welcome to LiteDepot",
-    "description": "Lightweight Inventory Management System - Please configure AITable connection",
+    "description": "Lightweight Inventory Management System - Please configure cloud service connection",
+    "cloudProviderLabel": "Cloud Service",
+    "cloudProviderPlaceholder": "Select cloud service provider",
     "employeeLabel": "Employee",
     "employeePlaceholder": "Enter employee name",
-    "apiKeyLabel": "AITable API Key",
+    "apiKeyLabel": "API Key",
     "apiKeyPlaceholder": "key...",
-    "apiKeyHint": "Get API Key from AITable personal settings",
+    "apiKeyHint": "Get API Key from cloud service personal settings",
     "workspaceLabel": "Workspace ID",
     "workspacePlaceholder": "spc...",
     "productsDatasheetLabel": "Products Datasheet ID",
@@ -57,7 +59,7 @@
     "startButton": "Get Started",
     "connecting": "Connecting...",
     "fillAllFields": "Please fill in all required fields",
-    "connectionError": "Failed to connect to AITable, please check API Key and IDs",
+    "connectionError": "Failed to connect to cloud service, please check API Key and IDs",
     "setupFailed": "Setup failed: "
   },
   "settings": {

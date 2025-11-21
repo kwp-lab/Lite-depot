@@ -65,9 +65,10 @@ function MyComponent() {
 - `loadProductsFromDB()`: 从本地 IndexedDB 加载
 - `syncFromRemote(viewId?)`: 从云端同步
 - `getProductByCode(code)`: 根据编号查找（扫码场景）
-- `updateProduct(id, fields)`: 更新货品
 - `setCloudProvider(provider)`: 设置云服务类型
 - `clearProducts()`: 清空本地货品缓存
+
+**重要说明**：货品数据仅用于扫码查找，不存储库存状态。入库/出库操作通过在 `transactions_datasheet_id` 表中创建交易记录实现。
 
 **使用场景**:
 ```typescript
@@ -103,48 +104,57 @@ function InboundPage() {
 **文件**: `outboundStore.ts`
 
 **状态**:
-- `items`: 出库货品列表
-- `borrowerName`: 借用人姓名
-- `isSubmitting`: 提交状态
-- `cloudProvider`: 云服务提供者类型
+- `items`: 出库货品列表（包含货品和数量）
 
 **方法**:
 - `addProduct(product)`: 添加货品到出库篮
 - `removeProduct(id)`: 移除货品
-- `setBorrowerName(name)`: 设置借用人姓名
-- `submit(...)`: 提交出库（批量更新）
-- `setCloudProvider(provider)`: 设置云服务类型
+- `updateQuantity(id, quantity)`: 更新货品出库数量
 - `clear()`: 清空出库篮
 
 **使用场景**:
 ```typescript
 import { useOutboundStore } from '@/store';
+import { ProviderFactory, CloudProviderType } from '@/api';
+import { toast } from 'sonner';
 
 function OutboundPage() {
-  const { items, borrowerName, addProduct, setBorrowerName, submit } = useOutboundStore();
+  const { items, addProduct, updateQuantity, clear } = useOutboundStore();
   const { config } = useConfigStore();
   
   const handleScan = (code: string) => {
     const product = getProductByCode(code);
-    if (product && product.fields[config.status_field] === '在库') {
+    if (product) {
       addProduct(product);
     }
   };
   
   const handleSubmit = async () => {
-    await submit(
-      config.employee_id!,
-      config.status_field!,
-      config.borrower_field!,
-      config.outbound_time_field!
-    );
+    const provider = ProviderFactory.getProvider(config.cloud_provider as CloudProviderType);
+    const outboundTime = new Date().toISOString();
+    
+    // 构建批量创建记录
+    const records = items.map(item => ({
+      fields: {
+        [config.sku_field || 'SKU']: item.product.product_id,
+        [config.type_field || 'Type']: 'out',
+        [config.quantity_field || 'Quantity']: item.quantity + '',
+        [config.time_field || 'Date']: outboundTime,
+        [config.operator_field || 'Employee']: config.employee_name || '未知',
+      },
+    }));
+    
+    await provider.batchCreate(records);
+    clear();
+    toast.success('出库成功！');
   };
 }
 ```
 
 **业务逻辑**:
-- ✅ 一次提交调用 Provider 的 `batchUpdate`
-- ✅ 如 >10 条则自动拆分为多批（Provider 内部处理）
+- ✅ 出库操作创建交易记录而非更新货品状态
+- ✅ 一次提交调用 Provider 的 `batchCreate`
+- ✅ 每个货品可以设置出库数量
 - ✅ 提交成功后自动清空出库篮
 
 ---

@@ -131,7 +131,7 @@ pnpm build:mac
 ```
 src/
 ├── api/              # API 接口层
-│   ├── aitables.ts   # AITable API 实现
+│   ├── aitable.ts   # AITable API 实现
 │   ├── base-provider.ts   # Provider 基类
 │   └── provider-factory.ts # Provider 工厂
 ├── components/       # UI 组件

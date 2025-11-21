@@ -4,6 +4,13 @@
 
 根据 **Technical Specification 第 5 章** 的数据存储设计，已完成 IndexedDB 的完整实现。
 
+**核心设计理念**：
+- **货品表（products）**：存储货品主数据（SKU、名称、规格等），用于扫码查找
+- **交易记录（transactions）**：入库/出库操作创建交易记录，而非修改货品状态
+- **配置表（system_config）**：存储系统配置和字段映射
+
+此设计确保了数据的可追溯性和审计能力，所有库存变动都有完整的历史记录。
+
 ## 已实现内容
 
 ### ✅ 1. 数据库 Schema（src/db/index.ts）
@@ -65,8 +72,9 @@ await saveConfig({
 - 从 IndexedDB 加载货品列表
 - 从云端同步货品数据（以远端为准）
 - 根据货品编号快速查找（扫码场景）
-- 更新货品信息（同时更新云端和本地）
 - 清空本地货品缓存
+
+**注意**：货品数据仅用于查找，不存储库存状态。入库/出库操作通过创建交易记录实现。
 
 **同步规则**:
 - ✅ 始终以远端为准（覆盖本地）
@@ -91,24 +99,40 @@ const product = getProductByCode('DEVICE001');
 
 **功能**:
 - 添加/移除货品到出库篮
-- 设置借用人姓名
-- 批量提交出库（调用 Provider 的 batchUpdate）
+- 更新货品出库数量
+- 批量提交出库（调用 Provider 的 batchCreate 创建交易记录）
 - 清空出库篮
 
 **业务逻辑**:
 - 出库篮数据仅存储在内存中（不持久化）
 - 提交成功后自动清空
-- 支持 >10 条货品的自动拆分批次
+- 出库操作创建交易记录而非更新货品状态
+- 每个货品可以设置出库数量
 
 **使用示例**:
 ```typescript
-const { items, addProduct, submit } = useOutboundStore();
+const { items, addProduct, updateQuantity, clear } = useOutboundStore();
+const { config } = useConfigStore();
 
 // 添加货品
 addProduct(product);
 
+// 更新数量
+updateQuantity(product.id, 5);
+
 // 提交出库
-await submit(employeeId, statusField, borrowerField, outboundTimeField);
+const provider = ProviderFactory.getProvider(config.cloud_provider as CloudProviderType);
+const records = items.map(item => ({
+  fields: {
+    [config.sku_field || 'SKU']: item.product.product_id,
+    [config.type_field || 'Type']: 'out',
+    [config.quantity_field || 'Quantity']: item.quantity + '',
+    [config.time_field || 'Date']: new Date().toISOString(),
+    [config.operator_field || 'Employee']: config.employee_name || '未知',
+  },
+}));
+await provider.batchCreate(records);
+clear();
 ```
 
 ### ✅ 5. 盘点状态存储（src/store/inventoryStore.ts）
@@ -233,9 +257,17 @@ productStore.getProductByCode(code)
   ↓
 在内存中的 products 数组查找
   ↓
-找到货品 → 显示详情 → 点击入库
+找到货品 → 显示详情 → 输入数量 → 点击入库
   ↓
-更新货品状态（云端 + 本地）
+创建入库交易记录（type='in'）
+  ↓
+provider.createRecord({
+  SKU: product_id,
+  Type: 'in',
+  Quantity: quantity,
+  Employee: employee_name,
+  Date: timestamp
+})
 ```
 
 ### 出库场景
@@ -245,11 +277,18 @@ productStore.getProductByCode(code)
   ↓
 productStore.getProductByCode(code)
   ↓
-检查货品状态 = '在库'?
+找到货品 → outboundStore.addProduct(product)
   ↓
-是 → outboundStore.addProduct(product)
+继续扫描添加更多货品
   ↓
-否 → 提示"货品已出库"
+调整每个货品的出库数量
+  ↓
+点击提交 → 批量创建出库交易记录（type='out'）
+  ↓
+provider.batchCreate([
+  { SKU: xxx, Type: 'out', Quantity: xxx, ... },
+  { SKU: yyy, Type: 'out', Quantity: yyy, ... },
+])
 ```
 
 ### 盘点场景
@@ -304,17 +343,23 @@ src/
 - 在内存中查找，性能优异
 - 支持离线查询
 
-### 3. 同步策略清晰
+### 3. 交易记录模式
+- 入库/出库操作创建交易记录而非更新货品状态
+- 使用 `transactions_datasheet_id` 表存储所有交易
+- 每条交易记录包含：SKU、Type（in/out）、Quantity、Employee、Date
+- 便于追溯和审计
+
+### 4. 同步策略清晰
 - 以远端为准（避免冲突）
 - 手动同步（可控性强）
 - 批量操作（性能优化）
 
-### 4. 模块化设计
+### 5. 模块化设计
 - Store 按功能划分
 - 职责清晰，易于维护
 - 支持多云服务扩展
 
-### 5. 完善的文档
+### 6. 完善的文档
 - 每个模块都有详细注释
 - 提供使用示例
 - 包含最佳实践

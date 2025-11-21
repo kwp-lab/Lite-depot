@@ -1,11 +1,12 @@
 import { BaseProvider } from './base-provider';
-import { AITableProvider } from './aitables';
+import { AITableProvider } from './aitable';
+import { VikaProvider } from './vika';
 import { AITableRecord, AITableSchema } from '../types';
 
 /**
  * 云服务提供者类型
  */
-export type CloudProviderType = 'aitable';
+export type CloudProviderType = 'aitable' | 'vika';
 
 /**
  * Provider 工厂类
@@ -31,6 +32,9 @@ export class ProviderFactory {
       case 'aitable':
         provider = new AITableProvider();
         break;
+      case 'vika':
+        provider = new VikaProvider();
+        break;
       default:
         throw new Error(`Unknown provider type: ${providerType}`);
     }
@@ -55,7 +59,12 @@ export class ProviderFactory {
       {
         value: 'aitable',
         label: 'AITable',
-        description: 'Streamline workflows with a visual database',
+        description: 'https://aitable.ai',
+      },
+      {
+        value: 'vika',
+        label: '维格云 (Vika)',
+        description: 'https://vika.cn',
       },
       // 未来可以添加更多提供者
       // {

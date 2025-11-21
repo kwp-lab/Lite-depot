@@ -142,7 +142,7 @@ api/
   index.ts              # 统一导出
   base-provider.ts      # 抽象基类
   provider-factory.ts   # Provider 工厂
-  aitables.ts          # AITable 实现
+  aitable.ts          # AITable 实现
   http.ts              # HTTP 客户端
 ```
 

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/Card';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useConfigStore } from '@/store';
 import { ProviderFactory } from '@/api';
 import { Loader2 } from 'lucide-react';
@@ -20,12 +21,13 @@ export const SetupPage: React.FC = () => {
     workspace_id: '',
     products_datasheet_id: '',
     transactions_datasheet_id: '',
-    // view_id: '',
-    status_field: 'status',
-    operator_field: 'borrower',
-    time_field: 'inbound_time',
-    outbound_time_field: 'outbound_time',
-    checked_time_field: 'last_checked_at',
+    sku_field: 'SKU',
+    type_field: 'Type (in/out)',
+    quantity_field: 'Quantity',
+    operator_field: 'Employee',
+    time_field: 'Date',
+    fullscreen_mode: false,
+    offline_enabled: true,
   });
   
   const [isLoading, setIsLoading] = useState(false);
@@ -33,6 +35,10 @@ export const SetupPage: React.FC = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleProviderChange = (value: string) => {
+    setFormData(prev => ({ ...prev, cloud_provider: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -90,6 +96,37 @@ export const SetupPage: React.FC = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">{t('setup.cloudProviderLabel')} {t('common.required')}</label>
+              <Select value={formData.cloud_provider} onValueChange={handleProviderChange}>
+                <SelectTrigger className="h-auto min-h-[2.5rem] py-2">
+                  <SelectValue placeholder={t('setup.cloudProviderPlaceholder')}>
+                    {formData.cloud_provider && (() => {
+                      const selectedProvider = ProviderFactory.getAvailableProviders().find(
+                        p => p.value === formData.cloud_provider
+                      );
+                      return selectedProvider ? (
+                        <div className="flex flex-col items-start">
+                          <span>{selectedProvider.label}</span>
+                          <span className="text-xs text-muted-foreground">{selectedProvider.description}</span>
+                        </div>
+                      ) : null;
+                    })()}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {ProviderFactory.getAvailableProviders().map((provider) => (
+                    <SelectItem key={provider.value} value={provider.value}>
+                      <div className="flex flex-col">
+                        <span>{provider.label}</span>
+                        <span className="text-xs text-muted-foreground">{provider.description}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div>
               <label className="block text-sm font-medium mb-2">{t('setup.employeeLabel')} {t('common.required')}</label>
               <Input
