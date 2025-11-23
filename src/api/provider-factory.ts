@@ -1,12 +1,13 @@
 import { BaseProvider } from './base-provider';
 import { AITableProvider } from './aitable';
 import { VikaProvider } from './vika';
-import { AITableRecord, AITableSchema } from '../types';
+import { BikaProvider } from './bika';
+import { DatabaseRecord, FieldsSchema } from '../types';
 
 /**
  * 云服务提供者类型
  */
-export type CloudProviderType = 'aitable' | 'vika';
+export type CloudProviderType = 'aitable' | 'vika' | 'bika';
 
 /**
  * Provider 工厂类
@@ -19,7 +20,7 @@ export class ProviderFactory {
    * 获取服务提供者实例（单例模式）
    * @param providerType 提供者类型
    */
-  static getProvider(providerType: CloudProviderType): BaseProvider<AITableRecord, AITableSchema> {
+  static getProvider(providerType: CloudProviderType): BaseProvider<DatabaseRecord, FieldsSchema> {
     // 如果已有实例，直接返回
     if (this.instances.has(providerType)) {
       return this.instances.get(providerType)!;
@@ -34,6 +35,9 @@ export class ProviderFactory {
         break;
       case 'vika':
         provider = new VikaProvider();
+        break;
+      case 'bika':
+        provider = new BikaProvider();
         break;
       default:
         throw new Error(`Unknown provider type: ${providerType}`);
@@ -66,12 +70,12 @@ export class ProviderFactory {
         label: '维格云 (Vika)',
         description: 'https://vika.cn',
       },
+      {
+        value: 'bika',
+        label: 'Bika',
+        description: 'https://bika.ai',
+      },
       // 未来可以添加更多提供者
-      // {
-      //   value: 'notion',
-      //   label: 'Notion',
-      //   description: 'Notion Database',
-      // },
     ];
   }
 }

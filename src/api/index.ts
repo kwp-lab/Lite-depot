@@ -1,13 +1,12 @@
 // 导出基础 Provider 类
 export { BaseProvider } from './base-provider';
 
-// 导出 AITable Provider（新接口）
+// 导出各云服务 Provider
 export { AITableProvider } from './aitable';
-
-// 导出 Vika Provider
 export { VikaProvider } from './vika';
+export { BikaProvider } from './bika';
 
-// 导出 Provider 工厂
+// 导出 Provider 工厂与类型
 export { ProviderFactory, type CloudProviderType } from './provider-factory';
 
 // 导出 HTTP 客户端

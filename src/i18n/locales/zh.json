@@ -81,7 +81,7 @@
     "transactionsDatasheetHint": "包含字段：ID, SKU, Type (in/out), Quantity, EmployeeID, Date",
     "transactionsDatasheetPlaceholder": "dst...",
     "fieldMappingTitle": "字段映射",
-    "fieldMappingDescription": "配置 AITable 表中的字段名称",
+    "fieldMappingDescription": "配置云服务数据表中的字段名称",
     "skuFieldLabel": "\"SKU/Product ID\" 字段",
     "skuFieldPlaceholder": "the field name for SKU or Product ID",
     "typeFieldLabel": "\"操作类型\" 字段",

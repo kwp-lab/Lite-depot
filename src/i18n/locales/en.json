@@ -81,7 +81,7 @@
     "transactionsDatasheetHint": "Fields: ID, SKU, Type (in/out), Quantity, EmployeeID, Date",
     "transactionsDatasheetPlaceholder": "dst...",
     "fieldMappingTitle": "Field Mapping",
-    "fieldMappingDescription": "Configure field names in AITable",
+    "fieldMappingDescription": "Configure field names in cloud service tables",
     "skuFieldLabel": "\"SKU/Product ID\" Field",
     "skuFieldPlaceholder": "the field name for SKU or Product ID",
     "typeFieldLabel": "\"Transaction Type\" Field",

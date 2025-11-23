@@ -1,5 +1,4 @@
-// AITable related types
-export interface AITableField {
+export interface Field {
   id: string;
   name: string;
   type: string;
@@ -8,13 +7,13 @@ export interface AITableField {
   };
 }
 
-export interface AITableRecord {
+export interface DatabaseRecord {
   recordId: string;
   fields: Record<string, any>;
 }
 
-export interface AITableSchema {
-  fields: AITableField[];
+export interface FieldsSchema {
+  fields: Field[];
 }
 
 // Provider related types

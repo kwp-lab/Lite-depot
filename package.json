@@ -1,7 +1,7 @@
 {
   "name": "litedepot",
   "productName": "LiteDepot",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "轻量级进出库管理软件 - Lightweight Inventory Management System",
   "private": true,
   "type": "module",
